@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\ProductCategory;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -20,10 +22,27 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
+        $categories = [
+            "Produits frais",
+            "Épicerie",
+            "Boissons",
+            "Produits bio",
+            "Produits surgelés",
+            "Pâtisserie",
+            "Pour animaux"
+        ];
         \App\Models\User::updateOrCreate(["name"=>"admin"], [
             "name"=>"admin",
             "password"=>bcrypt("12345"),
             "role"=>"admin",
         ]);
+        \App\Models\User::updateOrCreate(["name"=>"Johanna"], [
+            "name"=>"Johanna",
+            "password"=>bcrypt("12345"),
+            "role"=>"vendor",
+        ]);
+        foreach($categories  as $cat){
+            ProductCategory::updateOrCreate( ["name"=>$cat],["name"=>$cat]);
+        }
     }
 }

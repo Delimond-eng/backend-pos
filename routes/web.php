@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\StockController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -16,22 +19,48 @@ use Illuminate\Support\Facades\Route;
 
 Auth::routes();
 Route::middleware(['auth'])->group(function () {
-    Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
-    Route::get('/clients', [\App\Http\Controllers\HomeController::class, 'clientsManage'])->name('clients');
-    Route::get('/factures', [\App\Http\Controllers\HomeController::class, 'facturesManage'])->name('factures');
-    Route::get('/paiements', [\App\Http\Controllers\HomeController::class, 'paiementsManage'])->name('paiements');
-    Route::get('/users', [\App\Http\Controllers\HomeController::class, 'usersManage'])->name('users');
-    Route::get('/accounting', [\App\Http\Controllers\HomeController::class, 'accountingManage'])->name('accounting');
-    Route::get('/invoice', [\App\Http\Controllers\HomeController::class, 'invoiceCreate'])->name('invoice');
-    Route::get('/invoicepreview/{id}', [\App\Http\Controllers\HomeController::class, 'invoicePreview'])->name('invoicepreview');
-    Route::get('/stockage', [\App\Http\Controllers\HomeController::class, 'stockageManage'])->name('stockage');
-    Route::get('/configuration', [\App\Http\Controllers\HomeController::class, 'configManage'])->name('configuration');
-    Route::get('/inventories', [\App\Http\Controllers\HomeController::class, 'inventoriesManage'])->name('inventories');
+    Route::get('/', [HomeController::class, 'index'])->name('home');
+
+    Route::get("/users",[HomeController::class, 'usersManage'])->name("users");
+
+    Route::post("/user.create", [AdminController::class, 'createUser']);
+    Route::get("/users.all", [AdminController::class, 'allUser']);
+
+    // Création de produit
+    Route::post('/products', [StockController::class, 'createProduct'])->name('product.create');
+    
+    Route::get('/categories', [HomeController::class, 'getCategories'])->name('categories.all');
+    Route::post('/category.create', [AdminController::class, 'createCategory'])->name('category.create');
+    
+    Route::view('/view.categories', "categories")->name('view.categories');
+
+    // Enregistrement d'un achat (approvisionnement)
+    Route::post('/purchases', [StockController::class, 'storePurchase'])->name('purchase.store');
+
+    // Enregistrement d'une vente
+    Route::post('/sales', [StockController::class, 'storeSale'])->name('sale.store');
+
+    // Enregistrement d'une dépense
+    Route::post('/expenses', [StockController::class, 'storeExpense'])->name('expense.store');
+
+    // Démarrer un inventaire
+    Route::post('/inventories.start', [StockController::class, 'startInventory'])->name('inventory.start');
+
+    // Valider un inventaire
+    Route::post('/inventories.validate', [StockController::class, 'validateInventory'])->name('inventory.validate');
+
+    // Rapport de stock
+    Route::get('/reports.stock', [StockController::class, 'reportStock'])->name('report.stock');
+
+    // Rapport des ventes
+    Route::get('/reports.sales', [StockController::class, 'reportSales'])->name('report.sales');
+
+    // Rapport des dépenses
+    Route::get('/reports.expenses', [StockController::class, 'reportExpenses'])->name('report.expenses');
+
+    // Rapport des mouvements de stock
+    Route::get('/reports.stock-movements', [StockController::class, 'reportStockMovements'])->name('report.stock_movements');
 
 
-    /**
-     * Including routes
-    */
-    include __DIR__ . '/core/routes.php';
-
+    Route::post('/data.delete', [\App\Http\Controllers\PublicController::class, 'triggerDelete']);
 });

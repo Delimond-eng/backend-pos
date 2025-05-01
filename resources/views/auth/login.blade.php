@@ -5,8 +5,8 @@
     <div class="row justify-content-center align-items-center authentication authentication-basic h-100">
         <div class="col-xxl-4 col-xl-5 col-lg-5 col-md-6 col-sm-8 col-12">
             <div class="my-2 d-flex justify-content-center">
-                <img src="{{ asset('assets/images/logos/logo.png') }}" height="100" alt="logo" class="desktop-logo">
-                <img src="{{ asset('assets/images/logos/logo.png') }}" alt="logo" class="desktop-dark">
+                <h1 class="desktop-logo fw-bold" style="color: #e5523c;">Rapid Tech</h1>
+                <h1 class="desktop-dark fw-bold" style="color: #e5523c;">Rapid Tech</h1>
             </div>
             <div class="card custom-card">
                 <div class="card-body p-5">
@@ -45,7 +45,7 @@
                             </div>
                         </div>
                         <div class="col-xl-12 d-grid mt-2">
-                            <button type="submit" class="btn btn-lg btn-dark">Connecter</button>
+                            <button type="submit" class="btn btn-lg btn-danger" style="background-color: #e5523c;">Connecter</button>
                         </div>
                     </form>
                 </div>

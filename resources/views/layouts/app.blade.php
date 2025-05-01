@@ -13,7 +13,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- TITLE -->
-    <title> Zando Print & page = {{$title}} </title>
+    <title> RapidTech POS </title>
 
     <!-- FAVICON -->
     <link rel="icon" href="{{asset('assets/images/logos/logo.ico')}}" type="image/x-icon">
