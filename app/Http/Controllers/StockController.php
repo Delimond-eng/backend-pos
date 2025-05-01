@@ -216,7 +216,6 @@ class StockController extends Controller
     public function reportStock()
     {
         $products = Product::select('id', 'name', 'stock')->get();
-
         return response()->json(['stock_report' => $products]);
     }
 
@@ -228,7 +227,6 @@ class StockController extends Controller
     public function reportSales()
     {
         $sales = Sale::with('items.product')->orderByDesc('date')->get();
-
         return response()->json(['sales_report' => $sales]);
     }
 
@@ -240,7 +238,6 @@ class StockController extends Controller
     public function reportExpenses()
     {
         $expenses = Expense::with('type')->orderByDesc('date')->get();
-
         return response()->json(['expenses_report' => $expenses]);
     }
 
@@ -252,7 +249,6 @@ class StockController extends Controller
     public function reportStockMovements()
     {
         $movements = StockMovement::with('product')->orderByDesc('created_at')->get();
-
         return response()->json(['stock_movements' => $movements]);
     }
 }

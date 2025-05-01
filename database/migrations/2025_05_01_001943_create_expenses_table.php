@@ -13,17 +13,20 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::create('expense_types', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
+        });
+        
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('expense_type_id')->constrained();
             $table->date('date');
             $table->decimal('amount', 10, 2);
             $table->text('description')->nullable();
-            $table->string('reference_type')->nullable();
-            $table->unsignedBigInteger('reference_id')->nullable();
-            $table->foreignId('user_id')->constrained();
+            $table->foreignId('expense_type_id')->constrained('expense_types');
+            $table->foreignId('user_id')->constrained('users');
             $table->timestamps();
-            $table->index(['reference_type', 'reference_id']);
         });
     }
 
@@ -35,5 +38,6 @@ return new class extends Migration
     public function down()
     {
         Schema::dropIfExists('expenses');
+        Schema::dropIfExists('expense_types');
     }
 };

@@ -52,7 +52,9 @@
                         <div v-for="item in cart" :key="item.id" class="cart-item">
                             <img :src="item.image" :alt="item.name" class="cart-item-image">
                             <div class="cart-item-details">
-                                <div class="cart-item-name">{{ item.name }}</div>
+                                <div class="cart-item-name">
+                                    {{ item.name }}
+                                </div>
                                 <div class="cart-item-info">{{ item.quantity }} x {{ item.price.toFixed(2) }}F</div>
                             </div>
                             <div class="cart-item-actions">
@@ -103,7 +105,10 @@
                         @click="addToCart(product)">
                         <img :src="product.image" :alt="product.name" class="product-image">
                         <div class="product-info">
-                            <div class="product-name">{{ product.name }}</div>
+                            <div class="product-name">
+                                {{ product.name }} <br>
+                                <small style="font-weight: 400;">{{product.category}}</small>
+                            </div>
                             <div class="product-price">{{ product.price.toFixed(2) }}F</div>
                         </div>
                     </div>
@@ -125,7 +130,7 @@
                     </div>
                     <div class="product-details">
                         <h4 class="product-name">{{ currentProduct.name }}</h4>
-                        <p class="product-price">{{ currentProduct.price.toFixed(2) }}€</p>
+                        <p class="product-price">{{ currentProduct.price.toFixed(2) }}F</p>
                     </div>
                 </div>
                 <div class="quantity-display">

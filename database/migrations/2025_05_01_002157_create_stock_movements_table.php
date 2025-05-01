@@ -18,8 +18,6 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained();
             $table->integer('quantity');
             $table->string('type'); // purchase, sale, output, adjustment
-            $table->string('reference_type')->nullable();
-            $table->unsignedBigInteger('reference_id')->nullable();
             $table->timestamps();
         });
     }
