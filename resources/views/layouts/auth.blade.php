@@ -12,7 +12,7 @@
     <meta name="keywords" content="IT Developer, Freelance developer, ">
 
     <!-- TITLE -->
-    <title> Zando Print </title>
+    <title> RapidTech POS </title>
 
     <!-- FAVICON -->
     <link rel="icon" href="{{asset('assets/images/logos/logo.ico')}}" type="image/x-icon">

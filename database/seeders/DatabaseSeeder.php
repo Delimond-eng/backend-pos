@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\Product;
 use App\Models\ProductCategory;
 use Illuminate\Database\Seeder;
 
@@ -44,5 +45,11 @@ class DatabaseSeeder extends Seeder
         foreach($categories  as $cat){
             ProductCategory::updateOrCreate( ["name"=>$cat],["name"=>$cat]);
         }
+
+        Product::updateOrCreate(["name"=> "Gateaux new lis"], [
+            "name"=>"Gateaux new lis",
+            "category_id"=>2,
+            "unit_price"=>1500.00,
+        ]);
     }
 }

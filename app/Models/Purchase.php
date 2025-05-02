@@ -15,4 +15,8 @@ class Purchase extends Model
     {
         return $this->hasMany(PurchaseItem::class);
     }
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
 }

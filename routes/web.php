@@ -27,7 +27,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get("/users.all", [AdminController::class, 'allUser']);
 
     // Création de produit
-    Route::post('/products', [StockController::class, 'createProduct'])->name('product.create');
+    Route::post('/product.create', [StockController::class, 'createProduct'])->name('product.create');
+    
+    Route::get('/products', [StockController::class, 'getProducts'])->name('product.all');
+
+    Route::view("/view.products.add", "products_add")->name("view.products.add");
+
+    Route::view("/view.products", "products")->name("view.products");
     
     Route::get('/categories', [HomeController::class, 'getCategories'])->name('categories.all');
     Route::post('/category.create', [AdminController::class, 'createCategory'])->name('category.create');
@@ -36,6 +42,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Enregistrement d'un achat (approvisionnement)
     Route::post('/purchases', [StockController::class, 'storePurchase'])->name('purchase.store');
+
+    Route::get("/appro.stories", [StockController::class, 'getApproStories'])->name("appro.stories");
 
     // Enregistrement d'une vente
     Route::post('/sales', [StockController::class, 'storeSale'])->name('sale.store');

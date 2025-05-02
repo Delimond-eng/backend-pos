@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('purchases', function (Blueprint $table) {
             $table->id();
-            $table->string('supplier_name');
+            $table->string('supplier_name')->nullable();
             $table->date('date');
             $table->decimal('total_amount', 10, 2);
             $table->foreignId('user_id')->constrained();

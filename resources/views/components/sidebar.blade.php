@@ -47,8 +47,9 @@
                         <span class="side-menu__label">Produits</span> <i class="fe fe-chevron-right side-menu__angle"></i> 
                     </a>
                     <ul class="slide-menu child1" style="position: relative; left: 0px; top: 0px; margin: 0px; transform: translate3d(119.2px, 122.4px, 0px); display: none; box-sizing: border-box;" data-popper-placement="bottom">
-                        <li class="slide side-menu__label1"> <a href="javascript:void(0)">Liste des produits</a> </li>
-                        <li class="slide"> <a href="401-error.html" class="side-menu__item">Création produit</a> </li>
+                        <li class="slide side-menu__label1"> <a href="javascript:void(0)"></a> </li>
+                        <li class="slide"> <a href="{{ route("view.products") }}" class="side-menu__item">Liste des produits</a> </li>
+                        <li class="slide"> <a href="{{ route("view.products.add") }}" class="side-menu__item">Création produit</a> </li>
                         <li class="slide"> <a href="{{ route("view.categories") }}" class="side-menu__item">Catégories</a> </li>
                         <li class="slide"> <a href="500-error.html" class="side-menu__item">Inventaires</a> </li>
                     </ul>
@@ -60,7 +61,7 @@
                     </a>
                     <ul class="slide-menu child1" style="position: relative; left: 0px; top: 0px; margin: 0px; transform: translate3d(119.2px, 122.4px, 0px); display: none; box-sizing: border-box;" data-popper-placement="bottom">
                         <li class="slide"> <a href="" class="side-menu__item">Nouveau stock</a> </li>
-                        <li class="slide"> <a href="" class="side-menu__item">Historique</a> </li>
+                        <li class="slide"> <a href="{{ route("appro.stories") }}" class="side-menu__item">Historique</a> </li>
                     </ul>
                 </li>
 

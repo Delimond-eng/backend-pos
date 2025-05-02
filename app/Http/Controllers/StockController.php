@@ -8,6 +8,7 @@ use App\Models\Sale;
 use App\Models\Expense;
 use App\Models\StockMovement;
 use App\Models\Inventory;
+use App\Models\PurchaseItem;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,19 +20,86 @@ class StockController extends Controller
      * Crée un nouveau produit.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return mixed
      */
     public function createProduct(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|unique:products,name',
-            'category' => 'nullable|string',
-            'unit_price' => 'required|numeric|min:0'
+        try{
+            $validated = $request->validate([
+                'name' => 'required|string|unique:products,name',
+                'category_id' => 'required|exists:product_categories,id',
+                'unit_price' => 'required|numeric|min:0',
+                'stock_supplier_name'=>'nullable|string',
+                'stock_quantity'=>'nullable|integer',
+                'stock_unit_price'=>'nullable|numeric',
+                'stock_date'=> 'nullable|date'
+            ]);
+            $product = Product::create($validated);
+            if(isset($validated["stock_quantity"])){
+                $data = [
+                    "supplier_name"=>$validated["stock_supplier_name"],
+                    "date"=>$validated["stock_date"],
+                    "item"=>[
+                        "quantity"=>$validated["stock_quantity"],
+                        "unit_price"=>$validated["stock_unit_price"],
+                        "product_id"=>$product->id
+                    ]
+                ];
+                $this->addStock($data);
+            }
+    
+            return response()->json([
+                'status' => 'success',
+                'result' => "Produit créé avec succès !",
+            ]);
+        }
+        catch (\Illuminate\Validation\ValidationException $e) {
+            $errors = $e->validator->errors()->all();
+            return response()->json(['errors' => $errors ]);
+        }
+        catch (\Illuminate\Database\QueryException $e){
+            return response()->json(['errors' => $e->getMessage() ]);
+        }
+        
+    }
+
+    /**
+     * Ajoute un nouveau stock à un nouveau Produit
+     * 
+     * @param mixed $data
+    */
+    private function addStock($data){
+        $purchase = Purchase::create([
+            'supplier_name' => $data['supplier_name'],
+            'date' => $data['date'],
+            'user_id' => Auth::id(),
+            'total_amount' => 0
         ]);
 
-        $product = Product::create($validated);
+        $total = 0;
 
-        return response()->json(['message' => 'Produit créé.', 'product' => $product]);
+        $purchase->items()->create($data["item"]);
+        Product::find($data["item"]['product_id'])->increment('stock', $data["item"]['quantity']);
+        $total += $data["item"]['quantity'] * $data["item"]['unit_price'];
+
+        StockMovement::create([
+            'product_id' =>$data["item"]['product_id'],
+            'quantity' => $data["item"]['quantity'],
+            'type' => 'purchase',
+        ]);
+
+        $purchase->update(['total_amount' => $total]);
+    }
+
+    /**
+     * Liste les produits
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getProducts()
+    {
+        $products = Product::with('category')->orderByDesc('id')->get();
+        return response()->json(['products'=> $products]);
     }
 
     /**
@@ -55,7 +123,7 @@ class StockController extends Controller
             $purchase = Purchase::create([
                 'supplier_name' => $validated['supplier_name'],
                 'date' => $validated['date'],
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'total_amount' => 0
             ]);
 
@@ -70,8 +138,6 @@ class StockController extends Controller
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
                     'type' => 'purchase',
-                    'reference_type' => 'Purchase',
-                    'reference_id' => $purchase->id,
                 ]);
             }
 
@@ -80,6 +146,17 @@ class StockController extends Controller
             return response()->json(['message' => 'Achat enregistré.', 'purchase' => $purchase->load('items.product')]);
         });
     }
+
+
+    public function getApproStories(Request $request){
+        $stories = PurchaseItem::with(["purchase", "product"])->orderByDesc("id")->get();
+        return view("mvt_stories", [
+            "stories"=>$stories
+        ]);
+    }
+
+
+    
 
     /**
      * Enregistre une vente de produits.
@@ -117,8 +194,6 @@ class StockController extends Controller
                     'product_id' => $item['product_id'],
                     'quantity' => -$item['quantity'],
                     'type' => 'sale',
-                    'reference_type' => 'Sale',
-                    'reference_id' => $sale->id,
                 ]);
             }
 

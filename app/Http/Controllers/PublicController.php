@@ -23,7 +23,6 @@ class PublicController extends Controller
                 'table'=>'required|string',
                 'id'=>'required|int',
                 'id_field'=>'nullable|string',
-                'state'=>'required|string'
             ]);
             $field = $data['id_field'] ?? 'id';
             $result = DB::table($data['table'])
