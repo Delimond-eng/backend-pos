@@ -8,6 +8,7 @@ use App\Models\Sale;
 use App\Models\Expense;
 use App\Models\StockMovement;
 use App\Models\Inventory;
+use App\Models\InventoryLine;
 use App\Models\PurchaseItem;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -407,20 +408,29 @@ class StockController extends Controller
                 'inventory_id' => 'required|exists:inventories,id',
                 'items' => 'required|array|min:1',
                 'items.*.product_id' => 'required|exists:products,id',
-                'items.*.real_quantity' => 'required|integer'
+                'items.*.real_quantity' => 'required|integer',
+                'items.*.theoretical_quantity' => 'required|integer'
             ]);
     
             return DB::transaction(function () use ($validated) {
                 $inventory = Inventory::findOrFail($validated['inventory_id']);
-                $inventory->update(['status' => 'validated', 'validated_at' => now()]);
-    
+                $inventory->update(['status' => 'validated']);
+
                 foreach ($validated['items'] as $item) {
+
                     $product = Product::find($item['product_id']);
-                    $difference = $item['real_quantity'] - $product->stock;
-    
-                    if ($difference !== 0) {
+                    $difference = $item['real_quantity'] - $item["theoretical_quantity"];
+
+                    InventoryLine::create([
+                        "inventory_id"=>$inventory->id,
+                        "product_id"=>$item["product_id"],
+                        "theoretical_qty"=>$item["theoretical_quantity"],
+                        "real_qty"=>$item["real_quantity"],
+                        "difference"=>$difference
+                    ]);
+
+                    if ($difference != 0) {
                         $product->update(['stock' => $item['real_quantity']]);
-    
                         StockMovement::create([
                             'product_id' => $item['product_id'],
                             'quantity' => $difference,
@@ -495,5 +505,15 @@ class StockController extends Controller
     {
         $movements = StockMovement::with('product')->orderByDesc('created_at')->get();
         return response()->json(['stock_movements' => $movements]);
+    }
+    /**
+     * Retourne tous les mouvements de stock (ajustements).
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function reportStockAdjustments()
+    {
+        $movements = StockMovement::with('product')->where("type", "adjustment")->orderByDesc('created_at')->get();
+        return response()->json(['adjustments' => $movements]);
     }
 }

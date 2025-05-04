@@ -33,7 +33,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div v-if="isLoading" class="d-flex flex-column justify-content-center align-items-center p-5">
+                    <div v-if="isDataLoading" class="d-flex flex-column justify-content-center align-items-center p-5">
                         <span class="spinner-border text-primary"></span>
                         <span class="text-muted mt-1">Chargement...</span>
                     </div>

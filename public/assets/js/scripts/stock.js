@@ -15,11 +15,13 @@ new Vue({
             search: "",
             load_id: "",
             reports: [],
+            adjustments: [],
         };
     },
     mounted() {
         this.$nextTick(() => {
             this.getReports();
+            this.getAdjustmentReports();
         });
     },
 
@@ -30,6 +32,18 @@ new Vue({
                 .then((res) => {
                     this.isDataLoading = false;
                     this.reports = res.data.stock_movements;
+                })
+                .catch((err) => {
+                    console.log("error", err);
+                    this.isDataLoading = false;
+                });
+        },
+        getAdjustmentReports() {
+            this.isDataLoading = true;
+            get("/reports.adjustments")
+                .then((res) => {
+                    this.isDataLoading = false;
+                    this.adjustments = res.data.adjustments;
                 })
                 .catch((err) => {
                     console.log("error", err);
@@ -51,6 +65,10 @@ new Vue({
                     : this.reports;
             // Appliquer les calculs sur les résultats filtrés
             return filteredStocks;
+        },
+
+        allAdjustments() {
+            return this.adjustments;
         },
     },
 });

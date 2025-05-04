@@ -37,6 +37,7 @@ export async function postJson(url, form) {
         headers: {
             "X-CSRF-TOKEN": csrfToken,
             "Content-Type": "application/json",
+            accept: "application/json",
         },
         body: JSON.stringify(form),
     });

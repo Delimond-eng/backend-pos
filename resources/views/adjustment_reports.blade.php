@@ -6,7 +6,7 @@
 
     <!-- Page Header -->
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
-        <h1 class="page-title fw-semibold fs-18 mb-0">Rapport de stock</h1>
+        <h1 class="page-title fw-semibold fs-18 mb-0">Ajustement stock</h1>
         <div class="ms-md-1 ms-0">
             <nav>
                 <ol class="breadcrumb mb-0">
@@ -22,21 +22,13 @@
             <div class="card custom-card">
                 <div class="card-header justify-content-between">
                     <div class="card-title">
-                        Rapport de stock
+                        Rapport des ajustements
                     </div>
-                    <div class="d-flex">
-                        <div class="me-2 mb-sm-0">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="me-2">
                             <input v-model="search" class="form-control form-control-sm border-primary-subtle" type="text" placeholder="Recherche produit " aria-label=".form-control-sm example">
                         </div>
-                        <div class="me-2 mb-sm-0">
-                            <select class="form-control form-control-sm border-primary-subtle">
-                                <option value="" selected hidden>Type</option>
-                                <option value="purchase">Approvisionnement</option>
-                                <option value="sale">Vente</option>
-                                <option value="adjustment">Ajustement</option>
-                                <option value="outpout">Autre sortie</option>
-                            </select>
-                        </div>
+                        
                         <div class="me-2 d-flex justify-content-center align-items-center">
                             <input class="form-control form-control-sm border-primary-subtle" type="date" required />
                             <span>--</span>
@@ -69,17 +61,17 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(data, index) in allReports" :key="index">
-                                    <td :class="{'text-success':data.type == 'purchase', 'text-primary':data.type == 'adjustment', 'text-info':data.type == 'sale', 'text-danger':data.type == 'outpout'}">
+                                <tr v-for="(data, index) in allAdjustments" :key="index">
+                                    <td>
                                         @{{ data.created_at  }}
                                     </td>
-                                    <td :class="{' text-success':data.type == 'purchase', 'text-primary':data.type == 'adjustment', 'text-info':data.type == 'sale', 'text-danger':data.type == 'outpout'}">
+                                    <td>
                                         <span class="fw-semibold">@{{ data.product.name }} </span>
                                     </td>
-                                    <td :class="{' text-success':data.type == 'purchase', 'text-primary':data.type == 'adjustment', 'text-info':data.type == 'sale', 'text-danger':data.type == 'outpout'}">
+                                    <td>
                                         <span class="fw-semibold">@{{ data.type}}</span>
                                     </td>
-                                    <td :class="{' text-success':data.type == 'purchase', 'text-primary':data.type == 'adjustment', 'text-info':data.type == 'sale', 'text-danger':data.type == 'outpout'}">
+                                    <td>
                                         <span class="fw-semibold">@{{ data.quantity }}</span>
                                     </td>
                                 </tr>

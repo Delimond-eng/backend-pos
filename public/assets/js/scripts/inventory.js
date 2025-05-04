@@ -1,7 +1,7 @@
 import { get, postJson, post } from "../main/http.js";
 import Select2 from "../components/select2Component.js";
 new Vue({
-    el: "#AppSales",
+    el: "#AppInventory",
     components: {
         Select2,
     },
@@ -139,6 +139,45 @@ new Vue({
                 });
         },
 
+        //valider un inventaire en cours
+        validateInventory() {
+            let items = [];
+            this.inventoryLines.forEach((el) => {
+                items.push({
+                    theoretical_quantity: parseInt(el.stock_global),
+                    real_quantity: el.real_quantity,
+                    product_id: el.id,
+                });
+            });
+            let formData = {
+                inventory_id: this.currentInventory.id,
+                items: items,
+            };
+            this.isLoading = true;
+            postJson("/inventories.validate", formData)
+                .then(({ data }) => {
+                    this.isLoading = false;
+                    if (data.errors !== undefined) {
+                        this.error = data.errors;
+                    }
+                    if (data.result !== undefined) {
+                        this.loadCurrentInventory();
+                        this.clearAll();
+                        new Swal({
+                            title: data.result,
+                            icon: "success",
+                            timer: 3000,
+                            showConfirmButton: !1,
+                        });
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                    this.isLoading = false;
+                    this.error = err;
+                });
+        },
+
         // Sauvegarder l’état actuel dans le cache local
         saveInventoryToCache() {
             if (this.currentInventory) {
@@ -173,6 +212,12 @@ new Vue({
         // Nettoyer le cache
         clearInventoryCache() {
             localStorage.removeItem("inventory_cache");
+        },
+
+        clearAll() {
+            this.currentInventory = null;
+            this.selectedProductIds = [];
+            this.inventoryLines = [];
         },
     },
 

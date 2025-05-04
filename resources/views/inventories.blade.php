@@ -2,21 +2,42 @@
 
 
 @section('content')
-<div class="container-fluid" id="AppSales" v-cloak>
+<div class="container-fluid" id="AppInventory" v-cloak>
 
     <!-- Page Header -->
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
         <h1 class="page-title fw-semibold fs-18 mb-0">Inventaire des produits</h1>
         <div class="ms-md-1 ms-0" v-if="!currentInventory">
-            <nav>
-                <button :disabled="isLoading" @click.prevent="startInventory" class="btn btn-primary-gradient"> <i class="ri-bar-chart-2-fill"></i> Commencez un inventaire <span v-if="isLoading"
-                                                                        class="spinner-border spinner-border-sm ms-2"
-                                                                        style="height:12px; width:12px"></span></button>
-            </nav>
+
         </div>
     </div>
 
-    <div class="row">
+    <div class="row d-flex justify-content-center" v-if="!currentInventory">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="ecommerce-assurance" v-if="!isDataLoading">
+                        <p class="mb-1">
+                            <i class="ri-bar-chart-grouped-fill text-primary ri-5x"></i>
+                        </p>
+                        <p class="fs-14"> Veuillez commencer une nouveau inventaire !</p>
+                        <button :disabled="isLoading" @click.prevent="startInventory" class="btn btn-primary-gradient"> <i class="ri-arrow-right-line"></i> Commencez un inventaire <span v-if="isLoading"
+                                class="spinner-border spinner-border-sm ms-2"
+                                style="height:12px; width:12px"></span></button>
+                    </div>
+                    <div v-else class="ecommerce-assurance">
+                        <div class="d-flex flex-column justify-content-center align-items-center p-5">
+                            <span class="spinner-border text-primary"></span>
+                            <span class="text-muted mt-1">Chargement...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row" v-else>
         <div class="col-xl-4">
             <div class="card custom-card">
                 <div class="card-header justify-content-between">
@@ -36,8 +57,8 @@
                                     <div class="btn-list">
                                         <div class="form-check form-check-md">
                                             <input class="form-check-input form-checked-secondary border-info-subtle" type="checkbox" :id="`Checked-${data.id}`"
-                                            :checked="selectedProductIds.includes(data.id)"
-                                            @change="toggleProductSelection(data)">
+                                                :checked="selectedProductIds.includes(data.id)"
+                                                @change="toggleProductSelection(data)">
                                         </div>
                                     </div>
                                 </div>
@@ -98,19 +119,22 @@
                     <div class="d-flex flex-wrap align-items-center justify-content-between">
                         <div>
                             <div class="d-flex flex-column">
-                                <span>Total écart: <strong>@{{ getTotalGap() }}</strong> </span>
-                                <span>Valeur totale : <strong>@{{ getTotalValue() }}</strong>  F</span>
+                                <span>Total écart : <strong>@{{ getTotalGap() }}</strong> </span>
+                                <span>Valeur totale : <strong>@{{ getTotalValue() }}</strong> F</span>
                             </div>
                         </div>
                         <div>
                             <button type="button" @click.prevent="inventoryLines=[]; selectedProductIds=[]" class="btn btn-dark-light bg-dark-transparent">Annuler</button>
-                            <button class="btn btn-success">Valider & Ajuster</button>
+                            <button type="button" @click.prevent="validateInventory" :disabled="isLoading" class="btn btn-success">Valider & Ajuster <span v-if="isLoading"
+                                class="spinner-border spinner-border-sm ms-2"
+                                style="height:12px; width:12px"></span></button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
 @endsection
 

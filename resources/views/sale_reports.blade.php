@@ -2,16 +2,16 @@
 
 
 @section('content')
-<div class="container-fluid" id="AppInventory" v-cloak>
+<div class="container-fluid" id="AppDashboard" v-cloak>
 
     <!-- Page Header -->
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
-        <h1 class="page-title fw-semibold fs-18 mb-0">Historique d'inventaires</h1>
+        <h1 class="page-title fw-semibold fs-18 mb-0">Rapport des ventes</h1>
         <div class="ms-md-1 ms-0">
             <nav>
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="/">App</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">inventaires</li>
+                    <li class="breadcrumb-item active" aria-current="page">ventes</li>
                 </ol>
             </nav>
         </div>
@@ -22,7 +22,7 @@
             <div class="card custom-card">
                 <div class="card-header justify-content-between">
                     <div class="card-title">
-                        Liste des inventaires
+                        Rapport de toutes les ventes
                     </div>
                     <div class="d-sm-flex">
                         <div class="me-3 mb-3 mb-sm-0">
@@ -37,32 +37,32 @@
                         <span class="text-muted mt-1">Chargement...</span>
                     </div>
                     <div class="table-responsive" v-else>
-                        <div class="table-responsive" v-if="filteredInventories.length">
+                        <div class="table-responsive" v-if="filteredSaleReports.length">
                             <table class="table text-nowrap table-bordered">
                                 <thead>
                                     <tr>
                                         <th class="bg-primary-transparent text-primary">Date création</th>
-                                        <th class="bg-primary-subtle text-primary">Status</th>
-                                        <th class="bg-primary-transparent text-primary">Date validation</th>
+                                        <th class="bg-primary-subtle text-primary">Client</th>
+                                        <th class="bg-primary-transparent text-primary">Montant Total</th>
                                         <th class="bg-primary-subtle text-primary">Créer par</th>
                                         <th class="bg-primary-transparent text-primary">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <template v-for="(data, index) in filteredInventories" :key="data.id">
+                                    <template v-for="(data, index) in filteredSaleReports" :key="data.id">
                                         <!-- Ligne principale -->
                                         <tr>
                                             <td>
                                                 <div class="fs-14 d-flex">
                                                     <i class="ri-calendar-2-line me-2"></i>
-                                                    <span>@{{ data.created_at }}</span>
+                                                    <span>@{{ data.date }}</span>
                                                 </div>
                                             </td>
                                             <td class="fw-bold">
-                                                <span class="badge" :class="{'bg-warning-transparent text-warning':data.status == 'pending', 'bg-success-transparent text-success':data.status == 'validated', 'bg-danger-transparent text-danger':data.status == 'cancelled' }">@{{  data.status }}</span>
+                                                @{{ data.customer_name =='' ? "---" : data.customer_name}}
                                             </td>
                                             <td class="fw-bold">
-                                                @{{ data.status =='pending' ? '---' : data.updated_at }}
+                                                @{{ data.total_amount }}F
                                             </td>
                                             <td class="fw-bold">
                                                 @{{ data.user.name }}
@@ -76,36 +76,28 @@
                                                         :aria-controls="'details-' + data.id">
                                                         <i class="ri-eye-2-line me-1"></i>Voir détails
                                                     </button>
-                                                    <button class="btn btn-sm btn-bd-primary"><i class="ri-file-pdf-fill"></i>Exporter</button>
-                                                    <button title="Supprimer" v-if="data.status =='pending'" class="btn btn-sm btn-danger-transparent">
-                                                        <span v-if="load_id == data.id"
-                                                            class="spinner-border spinner-border-sm"
-                                                            style="height:12px; width:12px"></span>
-                                                        <i v-else class="ri-close-line"></i>
-                                                        Annuler
-                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
 
                                         <!-- Ligne de détails collapsible -->
-                                        <tr :id="`details-${data.id}`" class="collapse bg-light animated-collapse">
+                                        <tr :id="`details-${data.id}`"  class="collapse bg-light animated-collapse">
                                             <td colspan="5">
                                                 <table class="table mb-0">
                                                     <thead>
                                                         <tr>
                                                             <th class="bg-primary-transparent text-primary">Produit</th>
-                                                            <th class="bg-primary-transparent text-primary">Qté théorique</th>
-                                                            <th class="bg-primary-transparent text-primary">Qté réelle</th>
-                                                            <th class="bg-primary-transparent text-primary">Difference</th>
+                                                            <th class="bg-primary-transparent text-primary">Quantité</th>
+                                                            <th class="bg-primary-transparent text-primary">Prix unitaire</th>
+                                                            <th class="bg-primary-transparent text-primary">Total</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <tr v-for="item in data.lines" :key="item.id">
+                                                        <tr v-for="item in data.items" :key="item.id">
                                                             <td>@{{ item.product.name }}</td>
-                                                            <td>@{{ item.theoretical_qty }}</td>
-                                                            <td>@{{ item.real_qty }}</td>
-                                                            <td>@{{ item.difference }}</td>
+                                                            <td>@{{ item.quantity }}</td>
+                                                            <td>@{{ item.unit_price }}F</td>
+                                                            <td>@{{ item.quantity * item.unit_price }}F</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -126,7 +118,7 @@
 
 @section('scripts')
 <script src="{{ asset('assets/js/main/vue2.js') }}"></script>
-<script type="module" src="{{ asset('assets/js/scripts/inventory.js') }}"></script>
+<script type="module" src="{{ asset('assets/js/scripts/dashboard.js') }}"></script>
 @endsection
 
 @section("styles")

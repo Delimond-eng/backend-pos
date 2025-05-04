@@ -32,12 +32,10 @@
                     <ul class="slide-menu child1" style="position: relative; left: 0px; top: 0px; margin: 0px; transform: translate3d(119.2px, 122.4px, 0px); display: none; box-sizing: border-box;" data-popper-placement="bottom">
                         <!-- <li class="slide side-menu__label1"> <a href="javascript:void(0)">Error</a> </li> -->
                         <li class="slide"> <a href="{{url('/')}}" class="side-menu__item">Vue d'ensemble</a> </li>
-                        <li class="slide"> <a href="#" class="side-menu__item">Alertes de stock</a> </li>
-                        <li class="slide"> <a href="#" class="side-menu__item">Rapport des ventes</a> </li>
-                        <li class="slide"> <a href="#" class="side-menu__item">Rapport des achats</a> </li>
-                        <li class="slide"> <a href="#" class="side-menu__item">Rapport de stock</a> </li>
-                        <li class="slide"> <a href="#" class="side-menu__item">Rapport de profits</a> </li>
-                        <li class="slide"> <a href="#" class="side-menu__item">Rapport des dépenses</a> </li>
+                        <li class="slide"> <a href="{{ route("sale.reports")}}" class="side-menu__item">Rapport des ventes</a> </li>
+                        <li class="slide"> <a href="{{ route("purchase.reports") }}" class="side-menu__item">Rapport des achats</a> </li>
+                        <li class="slide"> <a href="{{ route("expense.reports") }}" class="side-menu__item">Rapport des dépenses</a> </li>
+                        <li class="slide"> <a href="" class="side-menu__item">Rapport de stock</a> </li>
                     </ul>
                 </li>
                 <!-- End::slide -->
@@ -55,7 +53,7 @@
                 </li>
 
                 <li class="slide">
-                    <a href="{{ route("inventories.stories") }}" class="side-menu__item {{ Route::is('inventories.stories') ? 'active' :'' }}"> <i class="bx bx-bar-chart side-menu__icon"></i> 
+                    <a href="{{ route("inventories.stories") }}" class="side-menu__item {{ Route::is('inventories.stories') ? 'active' :'' }}"> <i class="bx bx-timer side-menu__icon"></i> 
                         <span class="side-menu__label">Historique d'inventaires</span> 
                     </a>
                 </li>
@@ -82,7 +80,7 @@
 
                 <li class="slide has-sub"> 
                     <a href="javascript:void(0);" class="side-menu__item"> <i class="bx bx-chart side-menu__icon"></i> 
-                        <span class="side-menu__label">Depenses</span> <i class="fe fe-chevron-right side-menu__angle"></i> 
+                        <span class="side-menu__label">Dépenses</span> <i class="fe fe-chevron-right side-menu__angle"></i> 
                     </a>
                     <ul class="slide-menu child1" style="position: relative; left: 0px; top: 0px; margin: 0px; transform: translate3d(119.2px, 122.4px, 0px); display: none; box-sizing: border-box;" data-popper-placement="bottom">
                         <li class="slide"> <a href="{{ route("view.expenses") }}" class="side-menu__item">Gestion des dépenses</a> </li>
@@ -94,7 +92,7 @@
                         <span class="side-menu__label">Mouvements de Stock</span> <i class="fe fe-chevron-right side-menu__angle"></i> 
                     </a>
                     <ul class="slide-menu child1" style="position: relative; left: 0px; top: 0px; margin: 0px; transform: translate3d(119.2px, 122.4px, 0px); display: none; box-sizing: border-box;" data-popper-placement="bottom">
-                        <li class="slide"> <a href="" class="side-menu__item">Ajustements</a> </li>
+                        <li class="slide"> <a href="{{ url("/stock.adjustments") }}" class="side-menu__item">Ajustements</a> </li>
                         <li class="slide"> <a href="{{ url("/stock.reports") }}" class="side-menu__item">Historique</a> </li>
                     </ul>
                 </li>

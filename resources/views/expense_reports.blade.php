@@ -6,7 +6,7 @@
 
     <!-- Page Header -->
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
-        <h1 class="page-title fw-semibold fs-18 mb-0">Dépenses</h1>
+        <h1 class="page-title fw-semibold fs-18 mb-0">Rapport des Dépenses</h1>
         <div class="ms-md-1 ms-0">
             <nav>
                 <ol class="breadcrumb mb-0">
@@ -22,10 +22,10 @@
             <div class="card custom-card">
                 <div class="card-header justify-content-between">
                     <div class="card-title">
-                        Liste des Dépenses
+                        Rapport de toutes les dépenses
                     </div>
                     <div class="d-sm-flex">
-                        <div class="me-3 mb-3 mb-sm-0">
+                        <div class="me-2">
                             <div class="input-group">
                                 <select v-model="filter" class="form-control form-control-sm border-primary-subtle">
                                     <option value="" class="text-muted" hidden selected>--Rechercher par motif--</option>
@@ -34,7 +34,7 @@
                                 <button class="btn btn-sm btn-primary" @click="filter=''"><i class="ri-refresh-line"></i></button>
                             </div>
                         </div>
-                        <button data-bs-toggle="modal" data-bs-target="#expense-create-modal" class="btn btn-primary btn-sm"> <i class="ri-add-line"></i>Nouvelle dépense </button>
+                        <div class="dropdown"><a href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false" class="btn btn-info btn-sm btn-wave waves-effect waves-light"> Exporter<i class="ri-arrow-down-s-line align-middle ms-1 d-inline-block"></i></a> <ul role="menu" class="dropdown-menu"><li><a href="javascript:void(0);" class="dropdown-item">Excel</a></li> <li><a href="javascript:void(0);" class="dropdown-item">PDF</a></li></ul></div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -50,8 +50,7 @@
                                     <th scope="col" class="bg-primary-subtle text-primary">Montant</th>
                                     <th scope="col" class="bg-primary-transparent text-primary">Motif</th>
                                     <th scope="col" class="bg-primary-subtle text-primary">Déscription</th>
-                                    <th scope="col" class="bg-primary-transparent text-primary">Créer par</th>
-                                    <th scope="col" class="bg-primary-subtle text-primary"></th>
+                                    <th scope="col" class="bg-primary-transparent text-primary">Créer par</th>  
                                 </tr>
                             </thead>
                             <tbody>
@@ -74,15 +73,6 @@
                                     
                                     <td>
                                         <span class="fw-semibold">@{{ data.user.name }}</span>
-                                    </td>
-
-                                    <td>
-                                        <div class="btn-list">
-                                            <button title="Editer" class="btn btn-sm btn-info btn-icon" @click="editExpense(data)"><i class="ri-edit-2-fill"></i></button>
-                                            <button title="Supprimer" @click.prevent="deleteExpense(data.id)" class="btn btn-sm btn-danger btn-icon contact-delete">
-                                                <span v-if="load_id == data.id" class="spinner-border spinner-border-sm" style="height:12px; width:12px"></span><i v-else class="ri-delete-bin-line"></i> </button>
-
-                                        </div>
                                     </td>
                                 </tr>
                             </tbody>

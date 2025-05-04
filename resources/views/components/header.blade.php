@@ -33,9 +33,7 @@
 
         <!-- Start::header-content-right -->
         <div class="header-content-right">
-            <div class="header-element">
-                <a href="{{ route("sale.portal") }}" class="btn btn-outline-secondary my-2 me-4 d-flex justify-content-center align-items-center"><i class="ri-arrow-left-line me-1"></i> Retour à la vente</a>
-            </div>
+            
             <!-- Start::header-element -->
             <div class="header-element">
                 <!-- Start::header-link|dropdown-toggle -->
@@ -52,12 +50,13 @@
                 </a>
                 <!-- End::header-link|dropdown-toggle -->
                 <ul class="main-header-dropdown dropdown-menu pt-0 overflow-hidden header-profile-dropdown dropdown-menu-end" aria-labelledby="mainHeaderProfile">
-                    <li><a class="dropdown-item d-flex" href="#"><i class="ti ti-user-circle fs-18 me-2 op-7"></i>Profile</a></li>
+                    <li><a class="dropdown-item d-flex" href="#"><i class="ti ti-user-circle fs-18 me-2 op-7 text-info"></i>Profile</a></li>
+                    <li><a class="dropdown-item d-flex" href="{{ route("sale.portal") }}"><i class="ti ti-shopping-cart fs-18 me-2 op-7 text-primary"></i>Portail de vente</a></li>
                     <form id="logout-form" method="POST" action="{{ route('logout') }}" class="d-none">
                         @csrf
                         <button type="submit">Logout</button>
                     </form>
-                    <li><a class="dropdown-item d-flex" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="ti ti-logout fs-18 me-2 op-7"></i>Deconnexion</a></li>
+                    <li><a class="dropdown-item d-flex" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="ti ti-logout fs-18 me-2 op-7 text-danger"></i>Deconnexion</a></li>
                 </ul>
             </div>
             <!-- End::header-element -->

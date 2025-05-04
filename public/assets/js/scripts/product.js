@@ -121,7 +121,7 @@ new Vue({
             let self = this;
             new Swal({
                 title: "Attention! Action irréversible.",
-                text: "La suppression entraine tous les mouvements liés à ce produit ?",
+                text: "La suppression du produit entraine la suppression de tous les mouvements liés à ce produit ?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
