@@ -69,7 +69,7 @@ return [
     |
     */
 
-    'timezone' => 'Africa/Kinshasa',
+    'timezone' => 'utc',
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

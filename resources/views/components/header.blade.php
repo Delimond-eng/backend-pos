@@ -33,7 +33,9 @@
 
         <!-- Start::header-content-right -->
         <div class="header-content-right">
-
+            <div class="header-element">
+                <a href="{{ route("sale.portal") }}" class="btn btn-outline-secondary my-2 me-4 d-flex justify-content-center align-items-center"><i class="ri-arrow-left-line me-1"></i> Retour à la vente</a>
+            </div>
             <!-- Start::header-element -->
             <div class="header-element">
                 <!-- Start::header-link|dropdown-toggle -->

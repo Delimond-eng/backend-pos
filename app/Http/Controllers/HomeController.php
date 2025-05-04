@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Currencie;
+use App\Models\Expense;
+use App\Models\ExpenseType;
 use App\Models\Facture;
 use App\Models\ProductCategory;
 use Illuminate\Http\Request;
@@ -43,6 +45,18 @@ class HomeController extends Controller
         $categories = ProductCategory::orderByDesc("id")->get();
         return response()->json([
             "categories"=>$categories
+        ]);
+    }
+    public function getExpenseTypes(){
+        $expenseTypes = ExpenseType::orderByDesc("id")->get();
+        return response()->json([
+            "expenseTypes"=>$expenseTypes
+        ]);
+    }
+    public function getExpenses(){
+        $expenses = Expense::with(["type","user"])->orderByDesc("id")->get();
+        return response()->json([
+            "expenses"=>$expenses
         ]);
     }
 

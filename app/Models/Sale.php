@@ -9,11 +9,26 @@ class Sale extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['purchase_id', 'product_id', 'quantity', 'unit_price'];
+    protected $fillable = ['customer_name', 'date', 'total_amount', 'user_id'];
+
+
+    protected $casts = [
+        "date"=>"date:d/m/y h:i"
+    ];
 
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function items()
+    {
+        return $this->hasMany(SaleItem::class);
+    }
+
+
+    public function user(){
+        return $this->belongsTo(User::class);
     }
 
 }

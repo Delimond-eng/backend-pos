@@ -29,7 +29,7 @@
                             <input v-model="search" class="form-control form-control-sm" type="text" placeholder="Recherche produit " aria-label=".form-control-sm example">
                         </div>
 
-                        <a href="{{ route('view.products.add') }}" class="btn btn-primary btn-sm"> <i class="ri-add-line"></i> Ajouter produit </a>
+                        <button data-bs-toggle="modal" data-bs-target="#product-modal" class="btn btn-primary btn-sm"> <i class="ri-add-line"></i> Ajouter produit </button>
                     </div>
                 </div>
                 <div class="card-body">
@@ -41,43 +41,43 @@
                         <table class="table text-nowrap table-bordered">
                             <thead>
                                 <tr>
-                                    <th scope="col">Date création</th>
-                                    <th scope="col">Libellé</th>
-                                    <th scope="col">Catégorie</th>
-                                    <th scope="col">Prix unitaire</th>
-                                    <th scope="col">Stock</th>
-                                    <th scope="col">status</th>
-                                    <th scope="col"></th>
+                                    <th scope="col" class="bg-primary-transparent text-primary">Date création</th>
+                                    <th scope="col" class="bg-primary-subtle text-primary">Libellé</th>
+                                    <th scope="col" class="bg-primary-transparent text-primary">Catégorie</th>
+                                    <th scope="col" class="bg-primary-subtle text-primary">Prix unitaire</th>
+                                    <th scope="col" class="bg-primary-transparent text-primary">Stock</th>
+                                    <th scope="col" class="bg-primary-subtle text-primary">status</th>
+                                    <th scope="col" class="bg-primary-transparent text-primary"></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(data, index) in filteredProducts" :key="index">
-                                    <td>
+                                    <td :class="{'bg-danger-transparent text-danger':data.stock <= 0}">
                                         <div class="fs-14 d-flex">
                                             <i class="ri-calendar-2-line me-2"></i>
                                             <span>@{{ data.created_at}}</span>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td class="fw-bold" :class="{'bg-danger-transparent text-danger':data.stock <= 0}">
                                         @{{ data.name  }}
                                     </td>
-                                    <td>
+                                    <td :class="{'bg-danger-transparent text-danger':data.stock <= 0}">
                                         <span class="fw-semibold">@{{ data.category.name}} </span>
                                     </td>
-                                    <td>
+                                    <td :class="{'bg-danger-transparent text-danger':data.stock <= 0}">
                                         <span class="fw-semibold">@{{ data.unit_price}}F</span>
 
                                     </td>
-                                    <td>
+                                    <td :class="{'bg-danger-transparent text-danger':data.stock <= 0}">
                                         <span class="fw-semibold">@{{ data.stock }}</span>
                                     </td>
-                                    <td>
-                                        <span class="badge" :class="{'bg-success-transparent':data.stock > 0, 'bg-danger-transparent':data.stock === 0 }">@{{data.stock > 0 ? 'En stock' : 'Sans stock' }}</span>
+                                    <td :class="{'bg-danger-transparent text-danger':data.stock <= 0}">
+                                        <span class="badge" :class="{'bg-success':data.stock > 0, 'bg-danger':data.stock === 0 }">@{{data.stock > 0 ? 'En stock' : 'Sans stock' }}</span>
                                     </td>
-                                    <td>
+                                    <td :class="{'bg-danger-transparent text-danger':data.stock <= 0}">
                                         <div class="btn-list">
-                                            <button title="Editer" class="btn btn-sm btn-info-light btn-icon"><i class="ri-edit-2-fill"></i></button>
-                                            <button title="Supprimer" @click.prevent="deleteProduct(data.id)" class="btn btn-sm btn-danger-light btn-icon contact-delete">
+                                            <button title="Editer" class="btn btn-sm btn-info btn-icon"><i class="ri-edit-2-fill"></i></button>
+                                            <button title="Supprimer" @click.prevent="deleteProduct(data.id)" class="btn btn-sm btn-danger btn-icon contact-delete">
                                                 <span v-if="load_id == data.id" class="spinner-border spinner-border-sm" style="height:12px; width:12px"></span><i v-else class="ri-delete-bin-line"></i> </button>
 
                                         </div>
@@ -89,6 +89,72 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="modal fade" id="product-modal" aria-modal="true" role="dialog">
+        <form class="modal-dialog modal-xl" @submit.prevent="submitForm" id="form">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Création produit & <span class="text-primary">approvisionnement <sup class="text-info">(Optionnel)</sup></span></h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4">
+                    <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Erreur !</strong>@{{ error }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><i class="bi bi-x"></i></button>
+                    </div>
+                    <div v-if="result" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <strong>Succès !</strong>@{{ result }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><i class="bi bi-x"></i></button>
+                    </div>
+
+                    <div class="row gx-5">
+                        <div class="col-xxl-6 col-xl-12 col-lg-12 col-md-6">
+                            <div class="card custom-card shadow-none mb-0 border-0">
+                                <div class="card-header mb-3 pb-2">
+                                    <h2 class="card-title">Produit infos</h2>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="row gy-3">
+                                        <div class="col-xl-12"> 
+                                            <label for="product-name-add" class="form-label">Libellé <sup class="text-danger">*</sup></label>
+                                            <input type="text" name="name" class="form-control" id="product-name-add" placeholder="Libellé du produit..."> 
+                                        </div>
+                                        <div class="col-xl-6"> 
+                                            <label for="cat" class="form-label">Catégorie <sup class="text-danger">*</sup></label> 
+                                            <select name="category_id" id="cat" class="form-select">
+                                                <option value="" selected hidden>--Sélectionnez une catégorie--</option>
+                                                <option :value="cat.id" v-for="(cat, i) in categories" :key="i">@{{ cat.name }}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-xl-6"> <label for="product-actual-price" class="form-label">Prix unitaire de vente</label> <input type="number" name="unit_price" class="form-control" id="product-actual-price" placeholder="0.00F"> </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xxl-6 col-xl-12 col-lg-12 col-md-6">
+                            <div class="card custom-card shadow-none mb-0 border-0">
+                                <div class="card-header mb-3 pb-2">
+                                    <h2 class="card-title">Approvisionnement(Optionnel)</h2>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="row gy-3">
+                                        <div class="col-xl-6"> <label for="product-dealer-price" class="form-label">Prix d'achat unitaire</label> <input type="number" name="unit_price2" class="form-control" id="product-dealer-price" placeholder="0.00F"> </div>
+                                        <div class="col-xl-6"> <label for="product-discount" class="form-label">Quantité</label> <input type="number" name="quantity" class="form-control" id="product-discount" placeholder="0"> </div>
+                                        <div class="col-xl-6"> <label for="product-type" class="form-label">Date(optionnel)</label> <input type="date" name="date" class="form-control" id="product-type"> </div>
+                                        <div class="col-xl-6"> <label for="product-type" class="form-label">Fournisseur(optionnel)</label> <input type="text" name="supplier_name" class="form-control" id="product-type" placeholder="Fournisseur(optionnel)..."> </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger-light" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" :disabled="isLoading" class="btn btn-primary"><span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>Sauvegarder </button>
+                </div>
+            </div>
+        </form>
     </div>
 
 </div>

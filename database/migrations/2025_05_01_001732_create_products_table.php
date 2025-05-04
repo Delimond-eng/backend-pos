@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('photo')->nullable();
             $table->string('name');
-            $table->foreignId('category_id')->nullable()->constrained('product_categories');
+            $table->foreignId('category_id')->nullable()->constrained('product_categories')->cascadeOnDelete();
             $table->string('code_barre')->nullable();
             $table->decimal('unit_price', 10, 2);
             $table->integer('stock')->default(0);

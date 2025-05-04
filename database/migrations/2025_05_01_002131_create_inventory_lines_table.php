@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('inventory_lines', function (Blueprint $table) {
             $table->id();
             $table->foreignId('inventory_id')->constrained();
-            $table->foreignId('product_id')->constrained();
+            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->integer('theoretical_qty');
             $table->integer('real_qty');
             $table->integer('difference');

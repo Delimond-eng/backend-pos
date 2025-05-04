@@ -21,7 +21,7 @@ return new class extends Migration
         
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
-            $table->date('date');
+            $table->date('date')->useCurrent();
             $table->decimal('amount', 10, 2);
             $table->text('description')->nullable();
             $table->foreignId('expense_type_id')->constrained('expense_types');

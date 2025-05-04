@@ -29,18 +29,28 @@ export async function post(url, form) {
  * @returns {data, status} data: http response if status equal 200 or 201
  */
 export async function postJson(url, form) {
-    var csrfToken = document
+    const csrfToken = document
         .querySelector('meta[name="csrf-token"]')
         .getAttribute("content");
+
     const response = await fetch(url, {
         method: "POST",
         headers: {
             "X-CSRF-TOKEN": csrfToken,
             "Content-Type": "application/json",
+            Accept: "application/json",
         },
         body: JSON.stringify(form),
     });
-    const data = await response.json();
+
+    let data;
+    try {
+        data = await response.json();
+    } catch (e) {
+        const text = await response.text(); // utile pour debugger
+        throw new Error("Réponse non-JSON reçue :\n" + text);
+    }
+
     return { data, status: response.status };
 }
 

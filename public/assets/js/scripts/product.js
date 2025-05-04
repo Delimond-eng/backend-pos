@@ -11,9 +11,17 @@ new Vue({
             error: null,
             result: null,
             isLoading: false,
-            isLoading2: false,
+            isDataLoading: false,
             products: [],
             categories: [],
+            selectedProduct: null,
+            appro: {
+                pa: "",
+                qty: "",
+                date: "",
+                supplier: "",
+                pu: "",
+            },
             search: "",
             load_id: "",
         };
@@ -21,15 +29,15 @@ new Vue({
 
     methods: {
         viewAllProducts() {
-            this.isLoading = true;
+            this.isDataLoading = true;
             get("/products")
                 .then((res) => {
-                    this.isLoading = false;
+                    this.isDataLoading = false;
                     this.products = res.data.products;
                 })
                 .catch((err) => {
                     console.log("error", err);
-                    this.isLoading = false;
+                    this.isDataLoading = false;
                 });
         },
         allCategories() {
@@ -41,7 +49,6 @@ new Vue({
                     console.log("error", err);
                 });
         },
-
         submitForm(event) {
             const formData = new FormData();
             formData.append("name", event.target.name.value);
@@ -75,12 +82,46 @@ new Vue({
                     console.error(err);
                 });
         },
-
+        addStock(event) {
+            const formData = new FormData();
+            formData.append("supplier_name", this.appro.supplier);
+            formData.append("date", this.appro.date);
+            formData.append("quantity", this.appro.qty);
+            formData.append("unit_price", this.appro.pa);
+            formData.append("product_id", this.selectedProduct.id);
+            formData.append("pu", this.appro.pu);
+            this.isLoading = true;
+            post("/purchases", formData)
+                .then(({ data, status }) => {
+                    this.isLoading = false;
+                    if (data.errors !== undefined) {
+                        this.error = data.errors;
+                    }
+                    if (data.result !== undefined) {
+                        this.error = null;
+                        this.result = data.result;
+                        this.viewAllProducts();
+                        new Swal({
+                            title: "Produit approvisionné avec succès",
+                            icon: "success",
+                            showConfirmButton: !1,
+                            timer: 2000,
+                        });
+                        setTimeout(() => {
+                            $("#stock-modal").modal("hide");
+                        });
+                    }
+                })
+                .catch((err) => {
+                    this.isLoading = false;
+                    this.error = err;
+                });
+        },
         deleteProduct(id) {
             let self = this;
             new Swal({
                 title: "Attention! Action irréversible.",
-                text: "Voulez-vous vraiment supprimer ce produit ?",
+                text: "La suppression entraine tous les mouvements liés à ce produit ?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
@@ -98,6 +139,35 @@ new Vue({
                         .then((res) => {
                             self.load_id = "";
                             self.viewAllProducts();
+                        })
+                        .catch((err) => {
+                            self.load_id = "";
+                        });
+                }
+            });
+        },
+        deleteApprov(id, qte, itemId) {
+            let self = this;
+            new Swal({
+                title: "Attention! Action irréversible.",
+                text: "Voulez-vous vraiment supprimer cette approvisionnement ?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Confirmer",
+                cancelButtonText: "Annuler",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    self.load_id = id;
+                    postJson("/approv.delete", {
+                        id: id,
+                        item_id: itemId,
+                        qte: qte,
+                    })
+                        .then((res) => {
+                            self.load_id = "";
+                            location.reload();
                         })
                         .catch((err) => {
                             self.load_id = "";

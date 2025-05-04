@@ -10,9 +10,11 @@ use App\Models\StockMovement;
 use App\Models\Inventory;
 use App\Models\PurchaseItem;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class StockController extends Controller
 {
@@ -110,41 +112,54 @@ class StockController extends Controller
      */
     public function storePurchase(Request $request)
     {
-        $validated = $request->validate([
-            'supplier_name' => 'nullable|string',
-            'date' => 'required|date',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.unit_price' => 'required|numeric|min:0',
-        ]);
-
-        return DB::transaction(function () use ($validated) {
+        try{
+            $data = $request->validate([
+                'supplier_name' => 'nullable|string',
+                'date' => 'nullable|date',
+                'product_id' => 'required|exists:products,id',
+                'quantity' => 'required|int',
+                'unit_price' => 'required|numeric',
+            ]);
+    
             $purchase = Purchase::create([
-                'supplier_name' => $validated['supplier_name'],
-                'date' => $validated['date'],
+                'supplier_name' => $data['supplier_name'],
+                'date' => $data['date'] ?? Carbon::now(),
                 'user_id' => Auth::id(),
                 'total_amount' => 0
             ]);
-
+    
             $total = 0;
-
-            foreach ($validated['items'] as $item) {
-                $purchase->items()->create($item);
-                Product::find($item['product_id'])->increment('stock', $item['quantity']);
-                $total += $item['quantity'] * $item['unit_price'];
-
-                StockMovement::create([
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    'type' => 'purchase',
-                ]);
-            }
-
-            $purchase->update(['total_amount' => $total]);
-
-            return response()->json(['message' => 'Achat enregistré.', 'purchase' => $purchase->load('items.product')]);
-        });
+    
+            $purchase->items()->create([
+                'product_id'=>$data['product_id'], 
+                'quantity'=>$data['quantity'], 
+                'unit_price'=>$data['unit_price']
+            ]);
+            Product::find($data['product_id'])->increment('stock', $data['quantity']);
+            $total += (int)$data['quantity'] * (float)$data['unit_price'];
+    
+            StockMovement::create([
+                'product_id' =>$data['product_id'],
+                'quantity' => $data['quantity'],
+                'type' => 'purchase'
+            ]);
+            $purchase->total_amount = $total;
+            $purchase->save();
+            $p = Product::find($data['product_id']);
+            $p->unit_price = $request->input("pu");
+            $p->save();
+    
+            return response()->json([
+                "status"=>"success",
+                "result" => "Achat et approvisionnement enregistrés.",
+            ]);
+        }catch (\Illuminate\Validation\ValidationException $e) {
+            $errors = $e->validator->errors()->all();
+            return response()->json(['errors' => $errors ]);
+        }
+        catch (\Illuminate\Database\QueryException $e){
+            return response()->json(['errors' => $e->getMessage() ]);
+        }
     }
 
 
@@ -166,41 +181,131 @@ class StockController extends Controller
      */
     public function storeSale(Request $request)
     {
+        try{
+            $validated = $request->validate([
+                'client_name' => 'nullable|string',
+                'date' => 'nullable|date',
+                'items' => 'required|array|min:1',
+                'items.*.product_id' => 'required|exists:products,id',
+                'items.*.quantity' => 'required|integer|min:1',
+                'items.*.unit_price' => 'required|numeric|min:0',
+            ]);
+
+            return DB::transaction(function () use ($validated) {
+                $sale = Sale::create([
+                    'customer_name' => $validated['client_name'] ?? "",
+                    'date' => $validated['date'] ?? Carbon::now(),
+                    'user_id' => Auth::id(),
+                    'total_amount' => 0
+                ]);
+    
+                $total = 0;
+    
+                foreach ($validated['items'] as $item) {
+                    $sale->items()->create($item);
+                    Product::find($item['product_id'])->decrement('stock', $item['quantity']);
+                    $total += $item['quantity'] * $item['unit_price'];
+    
+                    StockMovement::create([
+                        'product_id' => $item['product_id'],
+                        'quantity' => -$item['quantity'],
+                        'type' => 'sale',
+                    ]);
+                }
+                $sale->total_amount = $total;
+                $sale->save();
+    
+                return response()->json([
+                    "status"=>"success",
+                    "result" => "Vente enregistrée.",
+                ]);
+            });
+        }catch (\Illuminate\Validation\ValidationException $e) {
+            $errors = $e->validator->errors()->all();
+            return response()->json(['errors' => $errors ]);
+        }
+        catch (\Illuminate\Database\QueryException $e){
+            return response()->json(['errors' => $e->getMessage() ]);
+        }
+        
+    }
+
+
+    /**
+     * Retourner le produit acheter
+     * 
+    */
+
+    public function returnProduct(Request $request)
+    {
         $validated = $request->validate([
-            'client_name' => 'nullable|string',
-            'date' => 'nullable|date',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.unit_price' => 'required|numeric|min:0',
+            'sale_id' => 'required|exists:sales,id',
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
         ]);
 
         return DB::transaction(function () use ($validated) {
-            $sale = Sale::create([
-                'client_name' => $validated['client_name'],
-                'date' => $validated['date'] ?? Carbon::now(),
-                'user_id' => Auth::id(),
-                'total_amount' => 0
-            ]);
+            $sale = Sale::findOrFail($validated['sale_id']);
+            // Vérifie que le produit fait partie de cette vente
+            $saleItem = $sale->items()->where('product_id', $validated['product_id'])->first();
 
-            $total = 0;
-
-            foreach ($validated['items'] as $item) {
-                $sale->items()->create($item);
-                Product::find($item['product_id'])->decrement('stock', $item['quantity']);
-                $total += $item['quantity'] * $item['unit_price'];
-
-                StockMovement::create([
-                    'product_id' => $item['product_id'],
-                    'quantity' => -$item['quantity'],
-                    'type' => 'sale',
-                ]);
+            if (!$saleItem) {
+                return response()->json(['errors' => 'Produit non trouvé dans la vente.'], 404);
             }
 
-            $sale->update(['total_amount' => $total]);
+            // Vérifie que la quantité retournée est possible
+            if ($validated['quantity'] > $saleItem->quantity) {
+                return response()->json(['errors' => 'Quantité retournée invalide.'], 400);
+            }
 
-            return response()->json(['message' => 'Vente enregistrée.', 'sale' => $sale->load('items.product')]);
+            // Met à jour le stock
+            Product::find($validated['product_id'])->increment('stock', $validated['quantity']);
+
+            // Enregistre un mouvement de retour
+            StockMovement::create([
+                'product_id' => $validated['product_id'],
+                'quantity' => $validated['quantity'],
+                'type' => 'return',
+            ]);
+
+            // Optionnel : mettre à jour la quantité de l'article vendu (ou créer un système de retour à part)
+            $saleItem->quantity -= $validated['quantity'];
+            $saleItem->save();
+
+            // Optionnel : recalculer le total de la vente
+            $newTotal = $sale->items->sum(function ($item) {
+                return $item->quantity * $item->unit_price;
+            });
+            $sale->total_amount = $newTotal;
+            $sale->save();
+
+            return response()->json([
+                'status' => 'success',
+                'result' => 'Retour enregistré.',
+            ]);
         });
+    }
+
+    /**
+     * Affiche la somme des ventes journalière
+     * @return JsonResponse
+    */
+    public function getDaySum(){
+        $sum = Sale::whereDate("created_at", Carbon::now())->sum("total_amount");
+        return response()->json(["day_sum"=>$sum]);
+    }
+
+
+    public function getReturnStories()
+    {
+        $retours = StockMovement::with('product')
+            ->where('type', 'return') // ou 'retour'
+            ->orderByDesc('created_at')
+            ->get();
+
+        return response()->json([
+            "returns"=>$retours
+        ]);
     }
 
     /**
@@ -211,20 +316,31 @@ class StockController extends Controller
      */
     public function storeExpense(Request $request)
     {
-        $validated = $request->validate([
-            'label' => 'required|string',
-            'amount' => 'required|numeric|min:0',
-            'date' => 'nullable|date', 
-        ]);
 
-        $expense = Expense::create([
-            'label' => $validated['label'],
-            'amount' => $validated['amount'],
-            'date' => $validated['date'] ?? Carbon::now(),
-            'user_id' => Auth::id(),
-        ]);
-
-        return response()->json(['message' => 'Dépense enregistrée.', 'expense' => $expense]);
+        try{
+            $validated = $request->validate([
+                'label' => 'required|string',
+                'amount' => 'required|numeric|min:0',
+                'date' => 'nullable|date', 
+            ]);
+    
+            $expense = Expense::create([
+                'label' => $validated['label'],
+                'amount' => $validated['amount'],
+                'date' => $validated['date'] ?? Carbon::now(),
+                'user_id' => Auth::id(),
+            ]);
+    
+            return response()->json(['message' => 'Dépense enregistrée.', 'expense' => $expense]);
+        }
+        catch (\Illuminate\Validation\ValidationException $e) {
+            $errors = $e->validator->errors()->all();
+            return response()->json(['errors' => $errors ]);
+        }
+        catch (\Illuminate\Database\QueryException $e){
+            return response()->json(['errors' => $e->getMessage() ]);
+        }
+       
     }
 
     /**
@@ -301,7 +417,7 @@ class StockController extends Controller
      */
     public function reportSales()
     {
-        $sales = Sale::with('items.product')->orderByDesc('date')->get();
+        $sales = Sale::with('items.product')->with("user")->orderByDesc('date')->get();
         return response()->json(['sales_report' => $sales]);
     }
 

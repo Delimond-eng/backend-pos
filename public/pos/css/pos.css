@@ -214,10 +214,19 @@ input:focus {
 .dropdown-header {
     background-color: #eb7361;
     padding: 10px;
-    font-weight: bold;
     display: flex;
-    align-items: center;
-    border-bottom: 1px solid #e5523c;
+    flex-direction: column;
+    align-items: start;
+    border-bottom: 1px solid #954337;
+}
+
+.dropdown-header small {
+    font-size: 10px;
+}
+
+.dropdown-header span {
+    font-size: 1.8em;
+    font-weight: 900;
 }
 
 .dropdown-header i {
