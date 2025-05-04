@@ -70,6 +70,10 @@ Route::middleware(['auth'])->group(function () {
     // === Gestion des inventaires ===
     Route::post('/inventories.start', [StockController::class, 'startInventory'])->name('inventory.start');
     Route::post('/inventories.validate', [StockController::class, 'validateInventory'])->name('inventory.validate');
+    Route::get('/inventories.current', [StockController::class, 'getCurrentInventory'])->name('inventories.current');
+    Route::get('/inventories.all', [StockController::class, 'getInventories'])->name('inventories.all');
+    Route::view("/view.inventories.stories", 'inventories_stories')->name("inventories.stories");
+    Route::view("/view.inventories", 'inventories')->name("view.inventories");
 
     // === Rapports ===
     Route::get('/reports.stock', [StockController::class, 'reportStock'])->name('report.stock');

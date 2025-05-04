@@ -50,8 +50,14 @@
                         <li class="slide side-menu__label1"> <a href="javascript:void(0)"></a> </li>
                         <li class="slide"> <a href="{{ route("view.products") }}" class="side-menu__item">Gestion des produits</a> </li>
                         <li class="slide"> <a href="{{ route("view.categories") }}" class="side-menu__item">Catégories</a> </li>
-                        <li class="slide"> <a href="500-error.html" class="side-menu__item">Inventaires</a> </li>
+                        <li class="slide"> <a href="{{ route("view.inventories") }}" class="side-menu__item">Inventaires</a> </li>
                     </ul>
+                </li>
+
+                <li class="slide">
+                    <a href="{{ route("inventories.stories") }}" class="side-menu__item {{ Route::is('inventories.stories') ? 'active' :'' }}"> <i class="bx bx-bar-chart side-menu__icon"></i> 
+                        <span class="side-menu__label">Historique d'inventaires</span> 
+                    </a>
                 </li>
 
                 <li class="slide has-sub"> 

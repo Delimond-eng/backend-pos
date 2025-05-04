@@ -11,8 +11,18 @@ class Inventory extends Model
 
     protected $fillable = ['date', 'status', 'user_id'];
 
+    protected $casts=[
+        "date"=>"date:d/m/y h:i",
+        "created_at"=>"date:d/m/y h:i",
+        "updated_at"=>"date:d/m/y h:i",
+    ];
+
     public function lines()
     {
         return $this->hasMany(InventoryLine::class);
+    }
+
+    public function user(){
+        return $this->belongsTo(User::class);
     }
 }

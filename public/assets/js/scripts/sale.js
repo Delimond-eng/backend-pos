@@ -82,12 +82,14 @@ new Vue({
                         this.error = data.errors;
                     }
                     if (data.result !== undefined) {
+                        $("#modal-returns").modal("hide");
                         new Swal({
                             title: data.result,
                             icon: "success",
                             showConfirmButton: !1,
                             timer: 3000,
                         });
+                        this.form.quantity = "";
                         this.getSales();
                         this.getSalesReturns();
                     }

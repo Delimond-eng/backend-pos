@@ -45,9 +45,12 @@
                                 <i class="ri-search-2-line"></i>
                             </button>
                         </div>
-                        <button class="btn btn-primary">
-                            Exporter
-                        </button>
+                        <div class="dropdown my-1"> <a href="javascript:void(0);" class="btn btn-primary btn-sm btn-wave waves-effect waves-light" data-bs-toggle="dropdown" aria-expanded="false"> Exporter<i class="ri-arrow-down-s-line align-middle ms-1 d-inline-block"></i> </a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a class="dropdown-item" href="javascript:void(0);">Excel</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);">PDF</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">

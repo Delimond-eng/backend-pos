@@ -19,4 +19,17 @@ class Product extends Model
     {
         return $this->belongsTo(ProductCategory::class);
     }
+
+
+    // Relation avec les mouvements de stock
+    public function movements()
+    {
+        return $this->hasMany(StockMovement::class);
+    }
+
+    // Accesseur pour la quantité globale (stock réel)
+    public function getStockGlobalAttribute()
+    {
+        return $this->movements()->sum('quantity'); // Entrées (+) - Sorties (-)
+    }
 }

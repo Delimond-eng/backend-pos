@@ -100,7 +100,7 @@ class StockController extends Controller
      */
     public function getProducts()
     {
-        $products = Product::with('category')->orderByDesc('id')->get();
+        $products = Product::with('category')->withSum('movements as stock_global', 'quantity')->orderByDesc('id')->get();
         return response()->json(['products'=> $products]);
     }
 
@@ -343,6 +343,28 @@ class StockController extends Controller
        
     }
 
+
+    public function getCurrentInventory()
+    {
+        $inventory = Inventory::where('user_id', Auth::id())
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
+
+        if ($inventory) {
+            return response()->json([
+                'status' => 'success',
+                'inventory' => $inventory
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'none',
+            'inventory' => null
+        ]);
+    }
+
+
     /**
      * Commence un inventaire physique.
      *
@@ -350,13 +372,26 @@ class StockController extends Controller
      */
     public function startInventory()
     {
-        $inventory = Inventory::create([
-            'started_at' => now(),
-            'status' => 'pending',
-            'user_id' => auth()->id()
-        ]);
-
-        return response()->json(['message' => 'Inventaire démarré.', 'inventory' => $inventory]);
+        try{
+            $inventory = Inventory::create([
+                'date' => Carbon::now(),
+                'status' => 'pending',
+                'user_id' => Auth::id()
+            ]);
+            return response()->json([
+                'status'=>'success',
+                'result' => 'Inventaire démarré.',
+                'inventory'=>$inventory
+            ]);
+        }
+        catch (\Illuminate\Validation\ValidationException $e) {
+            $errors = $e->validator->errors()->all();
+            return response()->json(['errors' => $errors ]);
+        }
+        catch (\Illuminate\Database\QueryException $e){
+            return response()->json(['errors' => $e->getMessage() ]);
+        }
+        
     }
 
     /**
@@ -367,36 +402,55 @@ class StockController extends Controller
      */
     public function validateInventory(Request $request)
     {
-        $validated = $request->validate([
-            'inventory_id' => 'required|exists:inventories,id',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.real_quantity' => 'required|integer'
-        ]);
-
-        return DB::transaction(function () use ($validated) {
-            $inventory = Inventory::findOrFail($validated['inventory_id']);
-            $inventory->update(['status' => 'validated', 'validated_at' => now()]);
-
-            foreach ($validated['items'] as $item) {
-                $product = Product::find($item['product_id']);
-                $difference = $item['real_quantity'] - $product->stock;
-
-                if ($difference !== 0) {
-                    $product->update(['stock' => $item['real_quantity']]);
-
-                    StockMovement::create([
-                        'product_id' => $item['product_id'],
-                        'quantity' => $difference,
-                        'type' => 'inventory_adjustment',
-                        'reference_type' => 'Inventory',
-                        'reference_id' => $inventory->id,
-                    ]);
+        try{
+            $validated = $request->validate([
+                'inventory_id' => 'required|exists:inventories,id',
+                'items' => 'required|array|min:1',
+                'items.*.product_id' => 'required|exists:products,id',
+                'items.*.real_quantity' => 'required|integer'
+            ]);
+    
+            return DB::transaction(function () use ($validated) {
+                $inventory = Inventory::findOrFail($validated['inventory_id']);
+                $inventory->update(['status' => 'validated', 'validated_at' => now()]);
+    
+                foreach ($validated['items'] as $item) {
+                    $product = Product::find($item['product_id']);
+                    $difference = $item['real_quantity'] - $product->stock;
+    
+                    if ($difference !== 0) {
+                        $product->update(['stock' => $item['real_quantity']]);
+    
+                        StockMovement::create([
+                            'product_id' => $item['product_id'],
+                            'quantity' => $difference,
+                            'type' => 'adjustment',
+                        ]);
+                    }
                 }
-            }
+    
+                return response()->json([
+                    'status'=>'success',
+                    'result' => 'Inventaire validé.',
+                    'inventory'=>$inventory
+                ]);
+            });
+        }
+        catch (\Illuminate\Validation\ValidationException $e) {
+            $errors = $e->validator->errors()->all();
+            return response()->json(['errors' => $errors ]);
+        }
+        catch (\Illuminate\Database\QueryException $e){
+            return response()->json(['errors' => $e->getMessage() ]);
+        }
+        
+    }
 
-            return response()->json(['message' => 'Inventaire validé.', 'inventory' => $inventory]);
-        });
+    public function getInventories(){
+        $inventories = Inventory::with("lines.product")->with("user")->orderByDesc("created_at")->get();
+        return response()->json([
+            "inventories"=>$inventories
+        ]);
     }
 
     /**
