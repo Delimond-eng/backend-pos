@@ -83,6 +83,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reports.adjustments', [StockController::class, 'reportStockAdjustments'])->name('report.adjustments');
     Route::view("/stock.adjustments", 'adjustment_reports')->name("stock.adjustments");
     Route::view("/stock.reports", "stock_reports")->name("stock.reports");
+    Route::view("/stock.global.reports", "stock_global_reports")->name("stock.global.reports");
+    Route::get("/stock.global", [StockController::class, "reportStockGlobal"])->name("stock.global");
     Route::view("/sale.reports", "sale_reports")->name("sale.reports");
     Route::view("/expense.reports", "expense_reports")->name("expense.reports");
     Route::get("/purchase.reports", [StockController::class, 'getApproStories'])->name("purchase.reports");

@@ -16,12 +16,14 @@ new Vue({
             load_id: "",
             reports: [],
             adjustments: [],
+            globals: [],
         };
     },
     mounted() {
         this.$nextTick(() => {
             this.getReports();
             this.getAdjustmentReports();
+            this.getStockGlobal();
         });
     },
 
@@ -50,6 +52,19 @@ new Vue({
                     this.isDataLoading = false;
                 });
         },
+        getStockGlobal() {
+            this.isDataLoading = true;
+            get("/stock.global")
+                .then((res) => {
+                    console.log(JSON.stringify(res.data.reports));
+                    this.isDataLoading = false;
+                    this.globals = res.data.reports;
+                })
+                .catch((err) => {
+                    console.log("error", err);
+                    this.isDataLoading = false;
+                });
+        },
     },
 
     computed: {
@@ -69,6 +84,10 @@ new Vue({
 
         allAdjustments() {
             return this.adjustments;
+        },
+
+        allGlobalStocks() {
+            return this.globals;
         },
     },
 });

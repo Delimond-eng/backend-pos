@@ -516,4 +516,35 @@ class StockController extends Controller
         $movements = StockMovement::with('product')->where("type", "adjustment")->orderByDesc('created_at')->get();
         return response()->json(['adjustments' => $movements]);
     }
+
+
+    public function reportStockGlobal(){
+        $reports = Product::select([
+            'products.id',
+            'products.name',
+            'products.stock',
+            // Totaux par type
+            DB::raw("SUM(CASE WHEN stock_movements.type = 'sale' THEN -stock_movements.quantity ELSE 0 END) as total_sale"),
+            DB::raw("SUM(CASE WHEN stock_movements.type = 'adjustment' THEN stock_movements.quantity ELSE 0 END) as total_adjustment"),
+            DB::raw("SUM(CASE WHEN stock_movements.type = 'return' THEN stock_movements.quantity ELSE 0 END) as total_return"),
+            DB::raw("SUM(CASE WHEN stock_movements.type = 'output' THEN -stock_movements.quantity ELSE 0 END) as total_output"),
+            DB::raw("SUM(CASE WHEN stock_movements.type = 'purchase' THEN stock_movements.quantity ELSE 0 END) as total_purchase"),
+            // Stock global (entrées - sorties)
+            DB::raw("SUM(
+                CASE
+                    WHEN stock_movements.type IN ('purchase', 'return', 'adjustment') THEN stock_movements.quantity
+                    WHEN stock_movements.type IN ('sale', 'output') THEN -stock_movements.quantity
+                    ELSE 0
+                END
+            ) as stock_actuel"),
+        ])
+        ->leftJoin('stock_movements', 'products.id', '=', 'stock_movements.product_id')
+        ->groupBy('products.id', 'products.name','products.stock')
+        ->get();
+
+        return response()->json([
+            "status"=>"success",
+            "reports"=>$reports
+        ]);
+    }
 }

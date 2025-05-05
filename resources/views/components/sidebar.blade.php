@@ -35,7 +35,7 @@
                         <li class="slide"> <a href="{{ route("sale.reports")}}" class="side-menu__item">Rapport des ventes</a> </li>
                         <li class="slide"> <a href="{{ route("purchase.reports") }}" class="side-menu__item">Rapport des achats</a> </li>
                         <li class="slide"> <a href="{{ route("expense.reports") }}" class="side-menu__item">Rapport des dépenses</a> </li>
-                        <li class="slide"> <a href="" class="side-menu__item">Rapport de stock</a> </li>
+                        <li class="slide"> <a href="{{ route("stock.global.reports") }}" class="side-menu__item">Rapport de stock</a> </li>
                     </ul>
                 </li>
                 <!-- End::slide -->
