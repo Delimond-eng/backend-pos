@@ -41,6 +41,19 @@ class LoginController extends Controller
         $this->middleware('auth')->only('logout');
     }
 
+    protected function authenticated(Request $request, $user)
+    {
+        if ($user->role === 'admin') {
+            return redirect()->route('home');
+        }
+
+        if ($user->role === 'vendor') {
+            return redirect()->route('sale.portal');
+        }
+        // Valeur par défaut
+        return redirect('/');
+    }
+
 
     protected function credentials(Request $request)
     {
@@ -71,8 +84,12 @@ class LoginController extends Controller
         if (Auth::attempt(['name' => $request->name, 'password' => $request->password])) {
             // Si la connexion réussit, rediriger vers l'URL d'accueil
             $user = Auth::user();
-            if($user['state'] == 'allowed' && $user['access']=='allowed'){
-                return redirect()->intended($this->redirectPath());
+            if ($user->role === 'admin') {
+                return redirect()->route('home');
+            }
+    
+            if ($user->role === 'vendor') {
+                return redirect()->route('sale.portal');
             }
             else{
                 Auth::logout();

@@ -18,6 +18,7 @@
     </div>
 
     <div class="row">
+        @if (Auth::user()->role=="admin")
         <div class="col-xl-12">
             <div class="card custom-card">
                 <div class="card-header justify-content-between">
@@ -77,12 +78,11 @@
                                                         <i class="ri-eye-2-line me-1"></i>Voir détails
                                                     </button>
                                                     <button class="btn btn-sm btn-bd-primary"><i class="ri-file-pdf-fill"></i>Exporter</button>
-                                                    <button title="Supprimer" v-if="data.status =='pending'" class="btn btn-sm btn-danger-transparent">
+                                                    <button @click.prevent="deleteInventory(data.id)" title="Annuler l'inventaire en cours..." v-if="data.status =='pending'" class="btn btn-sm btn-icon btn-danger-transparent">
                                                         <span v-if="load_id == data.id"
                                                             class="spinner-border spinner-border-sm"
                                                             style="height:12px; width:12px"></span>
-                                                        <i v-else class="ri-close-line"></i>
-                                                        Annuler
+                                                        <i v-else class="ri-delete-bin-line"></i>
                                                     </button>
                                                 </div>
                                             </td>
@@ -119,6 +119,7 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 
 </div>

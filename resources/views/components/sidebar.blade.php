@@ -48,16 +48,19 @@
                         <li class="slide side-menu__label1"> <a href="javascript:void(0)"></a> </li>
                         <li class="slide"> <a href="{{ route("view.products") }}" class="side-menu__item">Gestion des produits</a> </li>
                         <li class="slide"> <a href="{{ route("view.categories") }}" class="side-menu__item">Catégories</a> </li>
+                        @if (Auth::user()->role=="admin")
                         <li class="slide"> <a href="{{ route("view.inventories") }}" class="side-menu__item">Inventaires</a> </li>
+                        @endif
                     </ul>
                 </li>
-
+                @if (Auth::user()->role=="admin")
                 <li class="slide">
                     <a href="{{ route("inventories.stories") }}" class="side-menu__item {{ Route::is('inventories.stories') ? 'active' :'' }}"> <i class="bx bx-timer side-menu__icon"></i> 
                         <span class="side-menu__label">Historique d'inventaires</span> 
                     </a>
                 </li>
-
+                @endif
+                @if (Auth::user()->role=="admin")
                 <li class="slide has-sub"> 
                     <a href="javascript:void(0);" class="side-menu__item"> <i class="bx bx-archive-in side-menu__icon"></i> 
                         <span class="side-menu__label">Approvisionnement</span> <i class="fe fe-chevron-right side-menu__angle"></i> 
@@ -67,6 +70,7 @@
                         <li class="slide"> <a href="{{ route("appro.stories") }}" class="side-menu__item">Historique</a> </li>
                     </ul>
                 </li>
+                @endif
 
                 <li class="slide has-sub"> 
                     <a href="javascript:void(0);" class="side-menu__item"> <i class="bx bxs-shopping-bags side-menu__icon"></i> 
@@ -96,16 +100,21 @@
                         <li class="slide"> <a href="{{ url("/stock.reports") }}" class="side-menu__item">Historique</a> </li>
                     </ul>
                 </li>
+
                 <!-- Start::slide__category -->
-                <li class="slide__category"><span class="category-name">Manager</span></li>
+                 @if (Auth::user()->role=="admin")
+                 <li class="slide__category"><span class="category-name">Manager</span></li>
+                 @endif
                 <!-- End::slide__category -->
                 <!-- Start::slide -->
+                @if (Auth::user()->role=="admin")
                 <li class="slide">
                     <a href="{{route('users')}}" class="side-menu__item {{  Route::is('users') ? 'active' : '' }}">
                         <i class="bx bxs-user-circle side-menu__icon"></i>
                         <span class="side-menu__label">Gestion utilisateurs</span>
                     </a>
                 </li>
+                @endif
                 <!-- End::slide -->
             </ul>
             <div class="slide-right" id="slide-right"><svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191" width="24" height="24" viewBox="0 0 24 24">

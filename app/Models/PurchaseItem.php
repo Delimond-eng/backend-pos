@@ -11,6 +11,10 @@ class PurchaseItem extends Model
 
     protected $fillable = ['purchase_id', 'product_id', 'quantity', 'unit_price'];
 
+    protected $casts = [
+        "created_at"=>"date:d/m/y h:i"
+    ];
+
     public function product()
     {
         return $this->belongsTo(Product::class);

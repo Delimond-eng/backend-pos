@@ -76,7 +76,7 @@
                                                         :aria-controls="'details-' + data.id">
                                                         <i class="ri-eye-2-line me-1"></i>Voir détails
                                                     </button>
-                                                    <button title="Supprimer" class="btn btn-sm btn-danger btn-icon">
+                                                    <button :disabled="load_id == data.id" @click.prevent="deleteSaleProcess(data.id)" title="Supprimer" class="btn btn-sm btn-danger btn-icon">
                                                         <span v-if="load_id == data.id"
                                                             class="spinner-border spinner-border-sm"
                                                             style="height:12px; width:12px"></span>
@@ -106,12 +106,6 @@
                                                             <td>@{{ item.unit_price }}F</td>
                                                             <td>@{{ item.quantity * item.unit_price }}F</td>
                                                             <td>
-                                                                <button title="Supprimer" class="btn btn-sm btn-danger-transparent btn-icon me-1">
-                                                                    <!-- <span v-if="load_id == data.id"
-                                                                        class="spinner-border spinner-border-sm"
-                                                                        style="height:12px; width:12px"></span> -->
-                                                                    <i class="ri-delete-bin-6-line"></i>
-                                                                </button>
                                                                 <button class="btn btn-outline-primary btn-sm" @click.prevent="selectedSaleItem=item; form.quantity = item.quantity" data-bs-target="#modal-returns" data-bs-toggle="modal"> <i class="ri-restart-line"></i> Retour produit</button>
                                                             </td>
                                                         </tr>

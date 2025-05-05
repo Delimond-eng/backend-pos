@@ -776,3 +776,7 @@ input:focus {
         height: 100%;
     }
 }
+
+[v-cloak] {
+    display: none;
+}

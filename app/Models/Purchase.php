@@ -11,6 +11,11 @@ class Purchase extends Model
 
     protected $fillable = ['supplier_name', 'date', 'total_amount', 'user_id'];
 
+    protected $casts=[
+        "date"=> "date:d/m/y",
+        "created_at"=>"date:d/m/y h:i"
+    ];
+
     public function items()
     {
         return $this->hasMany(PurchaseItem::class);

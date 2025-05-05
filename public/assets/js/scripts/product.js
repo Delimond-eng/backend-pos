@@ -15,19 +15,76 @@ new Vue({
             products: [],
             categories: [],
             selectedProduct: null,
+            selectedAppro: null,
+            approvisionnements: [],
             appro: {
+                purchase_id: "",
                 pa: "",
                 qty: "",
                 date: "",
                 supplier: "",
                 pu: "",
             },
+            form: {
+                product_id: "",
+                name: "",
+                category_id: "",
+                unit_price: "",
+                purchase: {
+                    quantity: "",
+                    unit_price: "",
+                    supplier_name: "",
+                    date: "",
+                },
+            },
             search: "",
             load_id: "",
         };
     },
+    mounted() {
+        const self = this;
+        if ($("#product-modal").length) {
+            let myModal = document.getElementById("product-modal");
+            // Add an event listener for the 'hidden.bs.modal' event
+            myModal.addEventListener("hidden.bs.modal", function (event) {
+                self.clearFields();
+            });
+        }
 
+        if ($("#stock-modal").length) {
+            let myModal = document.getElementById("stock-modal");
+            // Add an event listener for the 'hidden.bs.modal' event
+            myModal.addEventListener("hidden.bs.modal", function (event) {
+                self.appro = {
+                    purchase_id: "",
+                    pa: "",
+                    qty: "",
+                    date: "",
+                    supplier: "",
+                    pu: "",
+                };
+            });
+        }
+
+        this.$nextTick(() => {
+            this.viewAllProducts();
+            this.allCategories();
+            this.getAllApprovisionnements();
+        });
+    },
     methods: {
+        getAllApprovisionnements() {
+            this.isDataLoading = true;
+            get("/appro.all")
+                .then((res) => {
+                    this.isDataLoading = false;
+                    this.approvisionnements = res.data.purchases;
+                })
+                .catch((err) => {
+                    console.log("error", err);
+                    this.isDataLoading = false;
+                });
+        },
         viewAllProducts() {
             this.isDataLoading = true;
             get("/products")
@@ -51,16 +108,17 @@ new Vue({
         },
         submitForm(event) {
             const formData = new FormData();
-            formData.append("name", event.target.name.value);
-            formData.append("category_id", event.target.category_id.value);
-            formData.append("unit_price", event.target.unit_price.value);
+            formData.append("product_id", this.form.product_id);
+            formData.append("name", this.form.name);
+            formData.append("category_id", this.form.category_id);
+            formData.append("unit_price", this.form.unit_price);
             formData.append(
                 "stock_supplier_name",
-                event.target.supplier_name.value
+                this.form.purchase.supplier_name
             );
-            formData.append("stock_quantity", event.target.quantity.value);
-            formData.append("stock_unit_price", event.target.unit_price2.value);
-            formData.append("stock_date", event.target.date.value);
+            formData.append("stock_quantity", this.form.purchase.quantity);
+            formData.append("stock_unit_price", this.form.purchase.unit_price);
+            formData.append("stock_date", this.form.purchase.date);
             this.isLoading = true;
 
             post("/product.create", formData)
@@ -71,9 +129,15 @@ new Vue({
                     }
                     if (data.result !== undefined) {
                         this.error = null;
-                        this.result = data.result;
                         this.viewAllProducts();
-                        console.log(JSON.stringify(data.result));
+                        this.clearFields();
+
+                        new Swal({
+                            title: data.result,
+                            icon: "success",
+                            showConfirmButton: !1,
+                            timer: 3000,
+                        });
                     }
                 })
                 .catch((err) => {
@@ -82,8 +146,40 @@ new Vue({
                     console.error(err);
                 });
         },
+
+        triggerEdit(data) {
+            this.form.product_id = data.id;
+            this.form.name = data.name;
+            this.form.unit_price = data.unit_price;
+            this.form.category_id = data.category_id;
+        },
+
+        editAppro(data) {
+            this.selectedAppro = data;
+            this.appro.purchase_id = data.id;
+            this.appro.pa = data.unit_price;
+            this.appro.qty = data.quantity;
+            this.appro.supplier = data.supplier_name;
+        },
+
+        clearFields() {
+            this.form = {
+                product_id: "",
+                name: "",
+                category_id: "",
+                unit_price: "",
+                purchase: {
+                    quantity: "",
+                    unit_price: "",
+                    supplier_name: "",
+                    date: "",
+                },
+            };
+        },
+
         addStock(event) {
             const formData = new FormData();
+            formData.append("purchase_id", this.appro.purchase_id);
             formData.append("supplier_name", this.appro.supplier);
             formData.append("date", this.appro.date);
             formData.append("quantity", this.appro.qty);
@@ -117,6 +213,44 @@ new Vue({
                     this.error = err;
                 });
         },
+        updateStock(event) {
+            const formData = new FormData();
+            formData.append("purchase_id", this.appro.purchase_id);
+            formData.append("supplier_name", this.appro.supplier);
+            formData.append("date", this.appro.date);
+            formData.append("quantity", this.appro.qty);
+            formData.append("unit_price", this.appro.pa);
+            formData.append("product_id", this.selectedAppro.product.id);
+            formData.append("pu", this.selectedAppro.product.unit_price);
+
+            this.isLoading = true;
+            post("/purchases", formData)
+                .then(({ data, status }) => {
+                    this.isLoading = false;
+                    if (data.errors !== undefined) {
+                        this.error = data.errors;
+                    }
+                    if (data.result !== undefined) {
+                        this.error = null;
+                        this.result = data.result;
+                        this.getAllApprovisionnements();
+                        new Swal({
+                            title: "Modification enregistrée avec succès",
+                            icon: "success",
+                            showConfirmButton: !1,
+                            timer: 2000,
+                        });
+                        setTimeout(() => {
+                            $("#stock-modal").modal("hide");
+                        }, 1000);
+                    }
+                })
+                .catch((err) => {
+                    this.isLoading = false;
+                    this.error = err;
+                });
+        },
+
         deleteProduct(id) {
             let self = this;
             new Swal({
@@ -146,6 +280,7 @@ new Vue({
                 }
             });
         },
+
         deleteApprov(id, qte, itemId) {
             let self = this;
             new Swal({
@@ -176,12 +311,6 @@ new Vue({
             });
         },
     },
-    mounted() {
-        this.$nextTick(() => {
-            this.viewAllProducts();
-            this.allCategories();
-        });
-    },
 
     computed: {
         filteredProducts() {
@@ -191,6 +320,17 @@ new Vue({
                 );
             } else {
                 return this.products;
+            }
+        },
+        filteredPurchases() {
+            if (this.search && this.search.trim()) {
+                return this.approvisionnements.filter((el) =>
+                    el.product.name
+                        .toLowerCase()
+                        .includes(this.search.toLowerCase())
+                );
+            } else {
+                return this.approvisionnements;
             }
         },
     },

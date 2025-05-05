@@ -25,9 +25,11 @@
                     <div class="card-title">
                         liste des utilisateurs
                     </div>
+                    @if (Auth::user()->role="admin")
                     <div class="d-sm-flex">
                         <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#user-modal"> <i class="ri-add-line"></i> Créez un nouveau utilisateur </button>
                     </div>
+                    @endif
                 </div>
                 <div class="card-body">
                     <div v-if="isDataLoading" class="d-flex flex-column justify-content-center align-items-center p-5">
@@ -49,10 +51,10 @@
                                 </div>
                                 <div>
                                     <div class="btn-list">
-
+                                        @if (Auth::user()->role="admin")
                                         <button title="Supprimer" @click.prevent="deleteUser(data.id)" class="btn btn-sm btn-danger-light btn-icon contact-delete">
                                             <span v-if="load_id == data.id" class="spinner-border spinner-border-sm" style="height:12px; width:12px"></span><i v-else class="ri-delete-bin-line"></i> </button>
-
+                                         @endif
                                     </div>
                                 </div>
                             </div>

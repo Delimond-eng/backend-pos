@@ -76,10 +76,11 @@
                                     </td>
                                     <td :class="{'bg-danger-transparent text-danger':data.stock <= 0}">
                                         <div class="btn-list">
-                                            <button title="Editer" class="btn btn-sm btn-info btn-icon"><i class="ri-edit-2-fill"></i></button>
+                                            @if (Auth::user()->role=="admin")
+                                            <button title="Editer" @click.prevent="triggerEdit(data)" data-bs-target="#product-modal" data-bs-toggle="modal" class="btn btn-sm btn-info btn-icon"><i class="ri-edit-2-fill"></i></button>
                                             <button title="Supprimer" @click.prevent="deleteProduct(data.id)" class="btn btn-sm btn-danger btn-icon contact-delete">
                                                 <span v-if="load_id == data.id" class="spinner-border spinner-border-sm" style="height:12px; width:12px"></span><i v-else class="ri-delete-bin-line"></i> </button>
-
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -118,16 +119,16 @@
                                     <div class="row gy-3">
                                         <div class="col-xl-12"> 
                                             <label for="product-name-add" class="form-label">Libellé <sup class="text-danger">*</sup></label>
-                                            <input type="text" name="name" class="form-control" id="product-name-add" placeholder="Libellé du produit..."> 
+                                            <input type="text" name="name" v-model="form.name" class="form-control" id="product-name-add" placeholder="Libellé du produit..."> 
                                         </div>
                                         <div class="col-xl-6"> 
                                             <label for="cat" class="form-label">Catégorie <sup class="text-danger">*</sup></label> 
-                                            <select name="category_id" id="cat" class="form-select">
+                                            <select v-model="form.category_id" name="category_id" id="cat" class="form-select">
                                                 <option value="" selected hidden>--Sélectionnez une catégorie--</option>
                                                 <option :value="cat.id" v-for="(cat, i) in categories" :key="i">@{{ cat.name }}</option>
                                             </select>
                                         </div>
-                                        <div class="col-xl-6"> <label for="product-actual-price" class="form-label">Prix unitaire de vente</label> <input type="number" name="unit_price" class="form-control" id="product-actual-price" placeholder="0.00F"> </div>
+                                        <div class="col-xl-6"> <label for="product-actual-price" class="form-label">Prix unitaire de vente</label> <input type="number" v-model="form.unit_price" name="unit_price" class="form-control" id="product-actual-price" placeholder="0.00F"> </div>
                                     </div>
                                 </div>
                             </div>
@@ -139,10 +140,10 @@
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="row gy-3">
-                                        <div class="col-xl-6"> <label for="product-dealer-price" class="form-label">Prix d'achat unitaire</label> <input type="number" name="unit_price2" class="form-control" id="product-dealer-price" placeholder="0.00F"> </div>
-                                        <div class="col-xl-6"> <label for="product-discount" class="form-label">Quantité</label> <input type="number" name="quantity" class="form-control" id="product-discount" placeholder="0"> </div>
-                                        <div class="col-xl-6"> <label for="product-type" class="form-label">Date(optionnel)</label> <input type="date" name="date" class="form-control" id="product-type"> </div>
-                                        <div class="col-xl-6"> <label for="product-type" class="form-label">Fournisseur(optionnel)</label> <input type="text" name="supplier_name" class="form-control" id="product-type" placeholder="Fournisseur(optionnel)..."> </div>
+                                        <div class="col-xl-6"> <label for="product-dealer-price" class="form-label">Prix d'achat unitaire</label> <input type="number" v-model="form.purchase.unit_price" name="unit_price2" class="form-control" id="product-dealer-price" placeholder="0.00F"> </div>
+                                        <div class="col-xl-6"> <label for="product-discount" class="form-label">Quantité</label> <input type="number" name="quantity" v-model="form.purchase.quantity" class="form-control" id="product-discount" placeholder="0"> </div>
+                                        <div class="col-xl-6"> <label for="product-type" class="form-label">Date(optionnel)</label> <input type="date" name="date" v-model="form.purchase.date" class="form-control" id="product-type"> </div>
+                                        <div class="col-xl-6"> <label for="product-type" class="form-label">Fournisseur(optionnel)</label> <input type="text" name="supplier_name" v-model="form.purchase.supplier_name" class="form-control" id="product-type" placeholder="Fournisseur(optionnel)..."> </div>
                                     </div>
                                 </div>
                             </div>

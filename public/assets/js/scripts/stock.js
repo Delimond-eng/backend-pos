@@ -87,7 +87,15 @@ new Vue({
         },
 
         allGlobalStocks() {
-            return this.globals;
+            const filteredStocks =
+                this.search && this.search.trim()
+                    ? this.globals.filter((el) =>
+                          el.name
+                              .toLowerCase()
+                              .includes(this.search.toLowerCase())
+                      )
+                    : this.globals;
+            return filteredStocks;
         },
     },
 });

@@ -100,6 +100,48 @@ new Vue({
                     this.error = err;
                 });
         },
+        deleteSaleProcess(id) {
+            const self = this;
+            new Swal({
+                title: "Confirmez la suppression de la vente ",
+                text: "Vous êtes sur le point de supprimer une vente ?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Confirmer",
+                cancelButtonText: "Annuler",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const formData = {
+                        sale_id: id,
+                    };
+                    self.load_id = id;
+                    postJson("/sale.delete", formData)
+                        .then(({ data, status }) => {
+                            self.isLoading = false;
+                            if (data.errors !== undefined) {
+                                self.error = data.errors;
+                            }
+                            if (data.result !== undefined) {
+                                new Swal({
+                                    title: data.result,
+                                    icon: "success",
+                                    showConfirmButton: !1,
+                                    timer: 3000,
+                                });
+                                self.getSales();
+                                self.getSalesReturns();
+                            }
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                            self.load_id = "";
+                            self.error = err;
+                        });
+                }
+            });
+        },
     },
     mounted() {
         this.$nextTick(() => {

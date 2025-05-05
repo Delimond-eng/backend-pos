@@ -79,8 +79,10 @@
                                     <td>
                                         <div class="btn-list">
                                             <button title="Editer" class="btn btn-sm btn-info btn-icon" @click="editExpense(data)"><i class="ri-edit-2-fill"></i></button>
+                                            @if (Auth::user()->role=="admin")
                                             <button title="Supprimer" @click.prevent="deleteExpense(data.id)" class="btn btn-sm btn-danger btn-icon contact-delete">
                                                 <span v-if="load_id == data.id" class="spinner-border spinner-border-sm" style="height:12px; width:12px"></span><i v-else class="ri-delete-bin-line"></i> </button>
+                                            @endif
 
                                         </div>
                                     </td>

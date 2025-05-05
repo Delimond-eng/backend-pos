@@ -14,7 +14,7 @@
 </head>
 
 <body>
-    <div id="app">
+    <div id="app" v-cloak>
         <header class="app-header">
             <div class="logo">
                 <i class="ri-shopping-bag-fill"></i>

@@ -178,6 +178,35 @@ new Vue({
                 });
         },
 
+        //Supprimer un inventaire en cours
+        deleteInventory(id) {
+            let self = this;
+            new Swal({
+                title: "Attention! Action irréversible.",
+                text: "Voulez-vous vraiment annuler l'inventaire en cours ?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Confirmer",
+                cancelButtonText: "Annuler",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    self.load_id = id;
+                    postJson("/inventory.cancel", {
+                        inventory_id: id,
+                    })
+                        .then((res) => {
+                            self.load_id = "";
+                            self.getInventories();
+                        })
+                        .catch((err) => {
+                            self.load_id = "";
+                        });
+                }
+            });
+        },
+
         // Sauvegarder l’état actuel dans le cache local
         saveInventoryToCache() {
             if (this.currentInventory) {

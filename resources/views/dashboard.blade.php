@@ -17,7 +17,7 @@
     </div>
 
     <!-- Start::row-1 -->
-    <div class="row" id="AppDashboard">
+    <div class="row" id="AppDashboard" v-cloak>
         <div class="col-lg-3">
             <div class="card custom-card">
                 <div class="card-body">

@@ -56,13 +56,15 @@ Route::middleware(['auth'])->group(function () {
 
     // === Gestion des achats (approvisionnements) ===
     Route::post('/purchases', [StockController::class, 'storePurchase'])->name('purchase.store');
-    Route::get("/appro.stories", [StockController::class, 'getApproStories'])->name("appro.stories");
+    Route::get("/appro.all", [StockController::class, 'getApproStories'])->name("appro.all");
+    Route::view("/appro.stories", "mvt_stories")->name("appro.stories");
     Route::view("/appro.add", "stock_approv")->name("appro.add");
 
     // === Gestion des ventes ===
     Route::post('/sales.store', [StockController::class, 'storeSale'])->name('sale.store');
     Route::get("/day.sale.count", [StockController::class, "getDaySum"])->name("day.sale.count");
     Route::post("/sale.return", [StockController::class, 'returnProduct'])->name("sale.return");
+    Route::post("/sale.delete", [StockController::class, 'deleteSale'])->name("sale.delete");
     Route::get("/sales.returns", [StockController::class, "getReturnStories"])->name("sales.returns");
     Route::view("/view.sales", 'sales')->name("view.sales");
     Route::view("/view.sales.return", 'sales_return')->name("view.sales.return");
@@ -70,6 +72,7 @@ Route::middleware(['auth'])->group(function () {
     // === Gestion des inventaires ===
     Route::post('/inventories.start', [StockController::class, 'startInventory'])->name('inventory.start');
     Route::post('/inventories.validate', [StockController::class, 'validateInventory'])->name('inventory.validate');
+    Route::post('/inventory.cancel', [StockController::class, 'deleteInventory'])->name('inventory.cancel');
     Route::get('/inventories.current', [StockController::class, 'getCurrentInventory'])->name('inventories.current');
     Route::get('/inventories.all', [StockController::class, 'getInventories'])->name('inventories.all');
     Route::view("/view.inventories.stories", 'inventories_stories')->name("inventories.stories");
@@ -87,7 +90,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get("/stock.global", [StockController::class, "reportStockGlobal"])->name("stock.global");
     Route::view("/sale.reports", "sale_reports")->name("sale.reports");
     Route::view("/expense.reports", "expense_reports")->name("expense.reports");
-    Route::get("/purchase.reports", [StockController::class, 'getApproStories'])->name("purchase.reports");
+    Route::view("/purchase.reports", "mvt_stories")->name("purchase.reports");
 
     // === TDB Reports ===
     Route::get("/reports.{name}", [HomeController::class, "getReports"])->name("report.{name}");

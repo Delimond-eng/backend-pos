@@ -21,9 +21,11 @@
                             <i class="ri-bar-chart-grouped-fill text-primary ri-5x"></i>
                         </p>
                         <p class="fs-14"> Veuillez commencer une nouveau inventaire !</p>
+                        @if (Auth::user()->role=="admin")
                         <button :disabled="isLoading" @click.prevent="startInventory" class="btn btn-primary-gradient"> <i class="ri-arrow-right-line"></i> Commencez un inventaire <span v-if="isLoading"
                                 class="spinner-border spinner-border-sm ms-2"
                                 style="height:12px; width:12px"></span></button>
+                        @endif
                     </div>
                     <div v-else class="ecommerce-assurance">
                         <div class="d-flex flex-column justify-content-center align-items-center p-5">

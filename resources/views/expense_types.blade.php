@@ -43,10 +43,10 @@
                                 </div>
                                 <div>
                                     <div class="btn-list">
-
+                                        @if (Auth::user()->role=="admin")
                                         <button title="Supprimer" @click.prevent="deleteExpenseType(data.id)" class="btn btn-sm btn-danger-light btn-icon contact-delete">
                                             <span v-if="load_id == data.id" class="spinner-border spinner-border-sm" style="height:12px; width:12px"></span><i v-else class="ri-delete-bin-line"></i> </button>
-
+                                        @endif
                                     </div>
                                 </div>
                             </div>

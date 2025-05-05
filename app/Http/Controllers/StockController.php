@@ -29,7 +29,7 @@ class StockController extends Controller
     {
         try{
             $validated = $request->validate([
-                'name' => 'required|string|unique:products,name',
+                'name' => 'required|string',
                 'category_id' => 'required|exists:product_categories,id',
                 'unit_price' => 'required|numeric|min:0',
                 'stock_supplier_name'=>'nullable|string',
@@ -37,11 +37,11 @@ class StockController extends Controller
                 'stock_unit_price'=>'nullable|numeric',
                 'stock_date'=> 'nullable|date'
             ]);
-            $product = Product::create($validated);
+            $product = Product::updateOrCreate(["id"=>$request->product_id],$validated);
             if(isset($validated["stock_quantity"])){
                 $data = [
                     "supplier_name"=>$validated["stock_supplier_name"],
-                    "date"=>$validated["stock_date"],
+                    "date"=>$validated["stock_date"] ?? Carbon::now(),
                     "item"=>[
                         "quantity"=>$validated["stock_quantity"],
                         "unit_price"=>$validated["stock_unit_price"],
@@ -111,64 +111,90 @@ class StockController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
+
     public function storePurchase(Request $request)
     {
-        try{
+        try {
             $data = $request->validate([
+                'purchase_id' => 'nullable|exists:purchases,id',
                 'supplier_name' => 'nullable|string',
                 'date' => 'nullable|date',
                 'product_id' => 'required|exists:products,id',
                 'quantity' => 'required|int',
                 'unit_price' => 'required|numeric',
+                'pu' => 'nullable|numeric',
             ]);
-    
-            $purchase = Purchase::create([
-                'supplier_name' => $data['supplier_name'],
-                'date' => $data['date'] ?? Carbon::now(),
-                'user_id' => Auth::id(),
-                'total_amount' => 0
-            ]);
-    
-            $total = 0;
-    
-            $purchase->items()->create([
-                'product_id'=>$data['product_id'], 
-                'quantity'=>$data['quantity'], 
-                'unit_price'=>$data['unit_price']
-            ]);
-            Product::find($data['product_id'])->increment('stock', $data['quantity']);
-            $total += (int)$data['quantity'] * (float)$data['unit_price'];
-    
+            DB::beginTransaction();
+
+            $purchase = Purchase::updateOrCreate(
+                ['id' => $data['purchase_id'] ?? null],
+                [
+                    'supplier_name' => $data['supplier_name'],
+                    'date' => $data['date'] ?? Carbon::now(),
+                    'user_id' => Auth::id(),
+                    'total_amount'=>0
+                ]
+            );
+
+            // On vérifie si l'article existe déjà dans l'achat
+            $item = $purchase->items()->where('product_id', $data['product_id'])->first();
+            $previousQty = $item ? $item->quantity : 0;
+            $newQty = $data['quantity'];
+
+            // Mise à jour ou création de l'item
+            $purchase->items()->updateOrCreate(
+                ['product_id' => $data['product_id']],
+                [
+                    'quantity' => $newQty,
+                    'unit_price' => $data['unit_price']
+                ]
+            );
+
+            // Ajustement du stock
+            $product = Product::findOrFail($data['product_id']);
+            $product->increment('stock', $newQty - $previousQty); // ajustement réel
+
+            // Enregistrement du mouvement
             StockMovement::create([
-                'product_id' =>$data['product_id'],
-                'quantity' => $data['quantity'],
+                'product_id' => $data['product_id'],
+                'quantity' => $newQty - $previousQty,
                 'type' => 'purchase'
             ]);
+
+            // Mise à jour du prix unitaire du produit si fourni
+            if (isset($data['pu'])) {
+                $product->unit_price = $data['pu'];
+                $product->save();
+            }
+
+            // Recalcul du montant total de l'achat
+            $total = $purchase->items->sum(function ($item) {
+                return $item->quantity * $item->unit_price;
+            });
+
             $purchase->total_amount = $total;
             $purchase->save();
-            $p = Product::find($data['product_id']);
-            $p->unit_price = $request->input("pu");
-            $p->save();
-    
+
+            DB::commit();
+
             return response()->json([
-                "status"=>"success",
-                "result" => "Achat et approvisionnement enregistrés.",
+                "status" => "success",
+                "result" => "Achat enregistré avec succès.",
             ]);
-        }catch (\Illuminate\Validation\ValidationException $e) {
-            $errors = $e->validator->errors()->all();
-            return response()->json(['errors' => $errors ]);
-        }
-        catch (\Illuminate\Database\QueryException $e){
-            return response()->json(['errors' => $e->getMessage() ]);
+        } 
+        catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->validator->errors()->all()]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['errors' => $e->getMessage()]);
         }
     }
 
 
+
     public function getApproStories(Request $request){
-        $stories = PurchaseItem::with(["purchase", "product"])->orderByDesc("id")->get();
-        return view("mvt_stories", [
-            "stories"=>$stories
-        ]);
+        $stories = PurchaseItem::with(["purchase.user", "product"])->orderByDesc("id")->get();
+        return response()->json(["purchases"=>$stories]);
     }
 
 
@@ -286,6 +312,46 @@ class StockController extends Controller
             ]);
         });
     }
+    /**
+     * Supprimer une vente entiere
+     * 
+    */
+
+    public function deleteSale(Request $request)
+    {
+        $validated = $request->validate([
+            'sale_id' => 'required|exists:sales,id',
+        ]);
+
+        return DB::transaction(function () use ($validated) {
+            $sale = Sale::with('items')->findOrFail($validated['sale_id']);
+
+            foreach ($sale->items as $item) {
+                // Mise à jour du stock
+                $product = Product::find($item->product_id);
+                if ($product) {
+                    $product->increment('stock', $item->quantity);
+                }
+
+                // Enregistrement du mouvement
+                StockMovement::create([
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'type' => 'return',
+                ]);
+            }
+
+            // Supprimer les éléments liés à la vente
+            $sale->items()->delete(); // si pas en cascade
+            $sale->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'result' => 'Suppression effectuée.',
+            ]);
+        });
+    }
+
 
     /**
      * Affiche la somme des ventes journalière
@@ -382,6 +448,35 @@ class StockController extends Controller
             return response()->json([
                 'status'=>'success',
                 'result' => 'Inventaire démarré.',
+                'inventory'=>$inventory
+            ]);
+        }
+        catch (\Illuminate\Validation\ValidationException $e) {
+            $errors = $e->validator->errors()->all();
+            return response()->json(['errors' => $errors ]);
+        }
+        catch (\Illuminate\Database\QueryException $e){
+            return response()->json(['errors' => $e->getMessage() ]);
+        }
+        
+    }
+
+    /**
+     * Supprimer un inventaire en cours
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteInventory(Request $request)
+    {
+        try{
+            $data = $request->validate([
+                'inventory_id'=>'required|int|exists:inventories,id'
+            ]);
+            $inventory = Inventory::where("id", $data["inventory_id"])->delete();
+            return response()->json([
+                'status'=>'success',
+                'result' => 'Inventaire annulé avec succès.',
                 'inventory'=>$inventory
             ]);
         }

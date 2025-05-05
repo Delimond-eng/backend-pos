@@ -32,16 +32,9 @@ class HomeController extends Controller
      */
     public function index()
     {
-        if(Auth::user()->role == 'admin'){
-            return view('dashboard', [
-                "title"=>"Dashboard"
-            ]);
-        }
-        else if(Auth::user()->role== 'vendor'){
-            return view('sales_home', [
-                "title"=>"POS_Home"
-            ]);
-        }
+        return view('dashboard', [
+            "title"=>"Dashboard"
+        ]);
     }
 
     public function getReports($name){
@@ -100,6 +93,4 @@ class HomeController extends Controller
             "title"=>"Utilisateurs"
         ]);
     }
-
-
 }
