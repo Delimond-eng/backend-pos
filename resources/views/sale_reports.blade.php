@@ -26,9 +26,12 @@
                     </div>
                     <div class="d-sm-flex">
                         <div class="me-3 mb-3 mb-sm-0">
-                            <input v-model="search" class="form-control form-control-sm border-primary-subtle" type="date" placeholder="Recherche produit " aria-label=".form-control-sm example">
+                            <div class="input-group">
+                                <input v-model="byDate" @input="getSaleReports" class="form-control form-control-sm border-primary-subtle" type="date" placeholder="Recherche produit " aria-label=".form-control-sm example">
+                                <button class="btn btn-icon btn-primary btn-sm" @click="byDate=''; getSaleReports()"><i class="ri-restart-line"></i></button>
+                            </div>
                         </div>
-                        <div class="me-3 mb-3 mb-sm-0"><button class="btn btn-outline-primary btn-sm"><i class="ri-file-pdf-fill me-1"></i> Exporter en PDF</button></div>
+                        <div class="me-3 mb-3 mb-sm-0"><button class="btn btn-outline-primary btn-sm" @click="downloadSalePdf"><i class="ri-file-pdf-fill me-1"></i> Exporter en PDF</button></div>
                     </div>
                 </div>
                 <div class="card-body">

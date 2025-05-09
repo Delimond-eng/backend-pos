@@ -29,16 +29,12 @@
                             <input v-model="search" class="form-control form-control-sm border-primary-subtle" type="text" placeholder="Recherche produit " aria-label=".form-control-sm example">
                         </div>
                         <div class="mb-3 mb-sm-0">
-                            <input class="form-control form-control-sm border-primary-subtle" type="date" required />
+                            <div class="input-group">
+                                <input v-model="byDate" @input="getAllApprovisionnements" class="form-control form-control-sm border-primary-subtle" type="date" required /> 
+                                <button class="btn btn-primary btn-sm btn-icon" @click="byDate=''; getAllApprovisionnements();"><i class="ri-restart-line"></i></button>  
+                            </div>
                         </div>
-                        <span class="text-capitalize mx-1">--</span>
-                        <div class="me-2 mb-3 mb-sm-0">
-                            <input class="form-control form-control-sm border-primary-subtle" type="date" />
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-sm me-2">
-                            <i class="ri-filter-line"></i>
-                            Filtrer
-                        </button>
+                        <button class="btn btn-outline-primary btn-sm ms-2" @click="downloadExportPdf">Exporter en PDF</button>
                     </div>
                 </div>
                 <div class="card-body">

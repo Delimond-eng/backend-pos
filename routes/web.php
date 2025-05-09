@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\StockController;
 use App\Models\Product;
@@ -108,4 +109,8 @@ Route::middleware(['auth'])->group(function () {
         ]);
     });
 
+
+    // === PDF Reports ===
+    Route::get("/sales.reports.export", [ExportController::class, "downloadSalesReport"])->name("sales.reports.export");
+    Route::get("/purchases.reports.export", [ExportController::class, "downloadApproStories"])->name("purchases.reports.export");
 });

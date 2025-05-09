@@ -38,6 +38,7 @@ new Vue({
                 },
             },
             search: "",
+            byDate: "",
             load_id: "",
         };
     },
@@ -75,7 +76,7 @@ new Vue({
     methods: {
         getAllApprovisionnements() {
             this.isDataLoading = true;
-            get("/appro.all")
+            get(`/appro.all?date=${this.byDate}`)
                 .then((res) => {
                     this.isDataLoading = false;
                     this.approvisionnements = res.data.purchases;
@@ -309,6 +310,10 @@ new Vue({
                         });
                 }
             });
+        },
+
+        downloadExportPdf() {
+            location.href = `/purchases.reports.export?date=${this.byDate}`;
         },
     },
 

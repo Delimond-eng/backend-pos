@@ -193,8 +193,16 @@ class StockController extends Controller
 
 
     public function getApproStories(Request $request){
-        $stories = PurchaseItem::with(["purchase.user", "product"])->orderByDesc("id")->get();
-        return response()->json(["purchases"=>$stories]);
+        $queryDate = $request->query("date");
+        
+        $stories = PurchaseItem::with(["purchase.user", "product"])
+            ->when($queryDate, function ($query, $queryDate) {
+                $query->whereDate('created_at', $queryDate);
+            })
+            ->orderByDesc("id")
+            ->get();
+    
+        return response()->json(["purchases" => $stories]);
     }
 
 
@@ -241,10 +249,13 @@ class StockController extends Controller
                 }
                 $sale->total_amount = $total;
                 $sale->save();
+
+                $ticketInfos = Sale::with("items.product")->with("user")->where("id", $sale->id)->first();
     
                 return response()->json([
                     "status"=>"success",
                     "result" => "Vente enregistrée.",
+                    "ticket"=>$ticketInfos
                 ]);
             });
         }catch (\Illuminate\Validation\ValidationException $e) {
@@ -574,11 +585,18 @@ class StockController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function reportSales()
+    public function reportSales(Request $request)
     {
-        $sales = Sale::with('items.product')->with("user")->orderByDesc('date')->get();
+        $date = $request->query('date');
+        $sales = Sale::with(['items.product', 'user'])
+            ->when($date, function ($query, $date) {
+                $query->whereDate('created_at', $date);
+            })
+            ->orderByDesc('created_at')
+            ->get();
         return response()->json(['sales_report' => $sales]);
     }
+
 
     /**
      * Retourne le rapport des dépenses.

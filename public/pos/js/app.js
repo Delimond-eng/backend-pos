@@ -214,15 +214,27 @@ new Vue({
                             });
                         }
                         if (data.result !== undefined) {
+                            console.log(JSON.stringify(data.ticket));
+
                             new Swal({
                                 title: data.result,
                                 icon: "success",
                                 showConfirmButton: !1,
                                 timer: 3000,
                             });
+
                             this.loadProducts();
                             this.loadDaySale();
                             this.cart = [];
+                            localStorage.setItem(
+                                "ticket",
+                                JSON.stringify(data.ticket)
+                            );
+                            const printWindow = window.open(
+                                "printing.html",
+                                "_blank",
+                                "width=800,height=600"
+                            );
                         }
                     })
                     .catch((err) => {

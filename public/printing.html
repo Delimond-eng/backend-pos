@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Ticket de vente</title>
+    <style>
+        * {
+            font-size: 12px;
+            font-family: 'Times New Roman', serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .ticket {
+            width: 58mm;
+            max-width: 100%;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .heading-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin: 2px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 2px 0;
+            font-size: 12px;
+        }
+
+        th.price,
+        td.price {
+            text-align: right;
+        }
+
+        th.quantity,
+        td.quantity {
+            text-align: center;
+        }
+
+        tr {
+            border-top: 1px solid black;
+        }
+
+        .centered {
+            text-align: center;
+        }
+
+        @media print {
+            .hidden-print {
+                display: none !important;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            .ticket {
+                width: 58mm;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ticket" id="ticket">
+        <!-- Le contenu du ticket sera généré par JavaScript -->
+    </div>
+
+    <a href="/sale.portal" class="hidden-print">Retour</a>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const ticket = JSON.parse(localStorage.getItem("ticket"));
+            if (!ticket) {
+                alert("Aucun ticket trouvé !");
+                return;
+            }
+
+            const container = document.getElementById("ticket");
+
+            const title = `<h1 class="title">PRESSING VESTON</h1>`;
+            const info = `
+                <div class="heading-text"><strong>FACTURE NO :</strong> <span>${ticket.id}</span></div>
+                <div class="heading-text"><strong>Date :</strong> <span>${ticket.date}</span></div>
+                <div class="heading-text"><strong>Client :</strong> <span>${ticket.customer_name || "Anonyme"}</span></div>
+                <div class="heading-text"><strong>Caissier :</strong> <span>${ticket.user.name}</span></div>
+                <br>
+            `;
+
+            let rows = `
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th class="quantity">QTE</th>
+                        <th class="price">PU</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+
+            ticket.items.forEach(item => {
+                rows += `
+                    <tr>
+                        <td>${item.product.name}</td>
+                        <td class="quantity">${item.quantity}</td>
+                        <td class="price">${parseFloat(item.unit_price).toFixed(2)} F</td>
+                    </tr>
+                `;
+            });
+
+            rows += `
+                <tr>
+                    <td><strong>TOTAL</strong></td>
+                    <td></td>
+                    <td class="price"><strong>${parseFloat(ticket.total_amount).toFixed(2)} CDF</strong></td>
+                </tr>
+                </tbody>
+            `;
+
+            const message = `
+                <p class="centered">Merci pour votre confiance !
+                    <br><strong>Boutique </strong>
+                </p>
+                <br><br><br><br><br>
+            `;
+
+            container.innerHTML = title + info + `<table>${rows}</table>` + message;
+
+            // Impression automatique
+            window.print();
+            window.onafterprint = () => {
+                window.close();
+            };
+        });
+    </script>
+</body>
+
+</html>

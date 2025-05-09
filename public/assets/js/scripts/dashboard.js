@@ -9,6 +9,7 @@ new Vue({
             products: [],
             saleReports: [],
             search: "",
+            byDate: "",
             counts: null,
         };
     },
@@ -49,7 +50,7 @@ new Vue({
 
         getSaleReports() {
             this.isDataLoading = true;
-            get("/reports.sales")
+            get(`reports.sales?date=${this.byDate}`)
                 .then((res) => {
                     this.isDataLoading = false;
                     this.saleReports = res.data.sales_report;
@@ -58,6 +59,10 @@ new Vue({
                     this.isDataLoading = false;
                     console.log("error", err);
                 });
+        },
+
+        downloadSalePdf() {
+            location.href = `/sales.reports.export?date=${this.byDate}`;
         },
     },
 
