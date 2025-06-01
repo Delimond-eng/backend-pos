@@ -121,14 +121,22 @@
                                             <label for="product-name-add" class="form-label">Libellé <sup class="text-danger">*</sup></label>
                                             <input type="text" name="name" v-model="form.name" class="form-control" id="product-name-add" placeholder="Libellé du produit..."> 
                                         </div>
-                                        <div class="col-xl-6"> 
+                                        <div class="col-xl-12"> 
                                             <label for="cat" class="form-label">Catégorie <sup class="text-danger">*</sup></label> 
                                             <select v-model="form.category_id" name="category_id" id="cat" class="form-select">
                                                 <option value="" selected hidden>--Sélectionnez une catégorie--</option>
                                                 <option :value="cat.id" v-for="(cat, i) in categories" :key="i">@{{ cat.name }}</option>
                                             </select>
                                         </div>
-                                        <div class="col-xl-6"> <label for="product-actual-price" class="form-label">Prix unitaire de vente</label> <input type="number" v-model="form.unit_price" name="unit_price" class="form-control" id="product-actual-price" placeholder="0.00F"> </div>
+                                        <div class="col-xl-6"> 
+                                            <label for="product-actual-price" class="form-label">Prix unitaire de vente</label> 
+                                            <input type="number" v-model="form.unit_price" name="unit_price" class="form-control" id="product-actual-price" placeholder="0.00F"> 
+                                        </div>
+                                        <div class="col-xl-6"> 
+                                            <label for="product-actual-price" class="form-label">Code barre</label> 
+                                            <input type="text" v-model="form.code_barre" name="code_barre" class="form-control" placeholder="xxxxxxx"> 
+                        
+                                        </div>
                                     </div>
                                 </div>
                             </div>

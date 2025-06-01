@@ -7,7 +7,6 @@
             <i class="ri-shopping-cart-2-line"></i>
             <h2>Panier</h2>
         </div>
-
         <div class="cart-items">
             <template v-if="cart.length === 0">
                 <div class="empty-cart">
@@ -53,7 +52,7 @@
         <div class="search-container">
             <div class="search-bar">
                 <i class="ri-search-2-line"></i>
-                <input type="text" placeholder="Recherche produit..." v-model="searchTerm">
+                <input type="text" id="barcode-input" autocomplete="off" placeholder="Recherche produit..." v-model="searchTerm">
             </div>
         </div>
 

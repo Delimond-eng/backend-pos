@@ -32,6 +32,7 @@ class StockController extends Controller
                 'name' => 'required|string',
                 'category_id' => 'required|exists:product_categories,id',
                 'unit_price' => 'required|numeric|min:0',
+                'code_barre' => 'nullable|string',
                 'stock_supplier_name'=>'nullable|string',
                 'stock_quantity'=>'nullable|integer',
                 'stock_unit_price'=>'nullable|numeric',

@@ -18,6 +18,7 @@ new Vue({
     },
     mounted() {
         this.$nextTick(() => {
+            this.readBarCode();
             this.loadCatDatas();
             this.loadProducts();
             this.loadDaySale();
@@ -32,7 +33,11 @@ new Vue({
                     (!this.searchTerm ||
                         p.name
                             .toLowerCase()
-                            .includes(this.searchTerm.toLowerCase()))
+                            .includes(this.searchTerm.toLowerCase()) ||
+                        (p.code_barre &&
+                            p.code_barre
+                                .toLowerCase()
+                                .includes(this.searchTerm.toLowerCase())))
             );
         },
         total() {
@@ -46,6 +51,101 @@ new Vue({
         },
     },
     methods: {
+        readBarCode() {
+            const input = document.getElementById("barcode-input");
+            const self = this;
+            // S'assurer que l'écouteur est ajouté une seule fois
+            if (!input.dataset.listenerAttached) {
+                input.dataset.listenerAttached = "true";
+
+                input.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter") {
+                        const barcode = input.value
+                            .replace(/[\r\n]+/g, "")
+                            .trim();
+
+                        if (!barcode) return;
+
+                        const product = self.products.find(
+                            (p) => p.code_barre === barcode
+                        );
+
+                        if (!product) {
+                            Swal.fire({
+                                title: "Produit introuvable",
+                                text: "Aucun produit ne correspond à ce code-barres.",
+                                icon: "error",
+                                timer: 3000,
+                                showConfirmButton: false,
+                            });
+
+                            input.value = "";
+                            self.searchTerm = "";
+                            return;
+                        }
+
+                        // Gestion du panier avec stock
+                        const found = self.cart.find(
+                            (p) => p.id === product.id
+                        );
+
+                        if (found) {
+                            if (found.quantity >= product.stock) {
+                                Swal.fire({
+                                    title: "Stock insuffisant !",
+                                    text:
+                                        "Impossible d'ajouter un produit au panier. Stock actuel : " +
+                                        product.stock,
+                                    icon: "warning",
+                                    timer: 3000,
+                                    showConfirmButton: false,
+                                });
+
+                                if (product.stock === 0) {
+                                    self.cart = self.cart.filter(
+                                        (p) => p.id !== product.id
+                                    );
+                                } else {
+                                    found.quantity = product.stock;
+                                }
+
+                                input.value = "";
+                                return;
+                            }
+
+                            found.quantity += 1;
+                        } else {
+                            if (product.stock === 0) {
+                                Swal.fire({
+                                    title: "Stock insuffisant !",
+                                    text:
+                                        "Impossible d'ajouter un produit au panier. Stock actuel : " +
+                                        product.stock,
+                                    icon: "warning",
+                                    timer: 3000,
+                                    showConfirmButton: false,
+                                });
+                                input.value = "";
+                                return;
+                            }
+
+                            self.cart.push({ ...product, quantity: 1 });
+                        }
+
+                        input.value = "";
+                        self.searchTerm = "";
+                    }
+                });
+            }
+
+            // Garder le focus actif sur l’input
+            setInterval(() => {
+                if (document.activeElement !== input) {
+                    input.focus();
+                }
+            }, 100);
+        },
+
         loadCatDatas() {
             get("/categories")
                 .then((res) => {
@@ -130,6 +230,7 @@ new Vue({
             this.numpadQty = product.quantity.toString();
             this.showNumpad = true;
         },
+
         confirmQty() {
             if (this.currentProduct && this.numpadQty) {
                 const quantity = parseInt(this.numpadQty);

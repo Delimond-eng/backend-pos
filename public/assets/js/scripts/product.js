@@ -30,6 +30,7 @@ new Vue({
                 name: "",
                 category_id: "",
                 unit_price: "",
+                code_barre: "",
                 purchase: {
                     quantity: "",
                     unit_price: "",
@@ -107,10 +108,12 @@ new Vue({
                     console.log("error", err);
                 });
         },
+
         submitForm(event) {
             const formData = new FormData();
             formData.append("product_id", this.form.product_id);
             formData.append("name", this.form.name);
+            formData.append("code_barre", this.form.code_barre);
             formData.append("category_id", this.form.category_id);
             formData.append("unit_price", this.form.unit_price);
             formData.append(
@@ -169,6 +172,7 @@ new Vue({
                 name: "",
                 category_id: "",
                 unit_price: "",
+                code_bare: "",
                 purchase: {
                     quantity: "",
                     unit_price: "",
@@ -214,6 +218,7 @@ new Vue({
                     this.error = err;
                 });
         },
+
         updateStock(event) {
             const formData = new FormData();
             formData.append("purchase_id", this.appro.purchase_id);

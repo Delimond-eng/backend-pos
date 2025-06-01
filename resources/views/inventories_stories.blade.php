@@ -29,7 +29,6 @@
                         <div class="me-3 mb-3 mb-sm-0">
                             <input v-model="search" class="form-control form-control-sm border-primary-subtle" type="date" placeholder="Recherche produit " aria-label=".form-control-sm example">
                         </div>
-                        <div class="me-3 mb-3 mb-sm-0"><button class="btn btn-outline-primary btn-sm"><i class="ri-file-pdf-fill me-1"></i> Exporter en PDF</button></div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -77,7 +76,7 @@
                                                         :aria-controls="'details-' + data.id">
                                                         <i class="ri-eye-2-line me-1"></i>Voir détails
                                                     </button>
-                                                    <button class="btn btn-sm btn-bd-primary"><i class="ri-file-pdf-fill"></i>Exporter</button>
+                                                    <!-- <button class="btn btn-sm btn-bd-primary"><i class="ri-file-pdf-fill"></i>Exporter</button> -->
                                                     <button @click.prevent="deleteInventory(data.id)" title="Annuler l'inventaire en cours..." v-if="data.status =='pending'" class="btn btn-sm btn-icon btn-danger-transparent">
                                                         <span v-if="load_id == data.id"
                                                             class="spinner-border spinner-border-sm"
