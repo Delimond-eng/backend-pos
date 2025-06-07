@@ -34,7 +34,6 @@
                                 <button class="btn btn-sm btn-primary" @click="filter=''"><i class="ri-refresh-line"></i></button>
                             </div>
                         </div>
-                        <div class="dropdown"><a href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false" class="btn btn-info btn-sm btn-wave waves-effect waves-light"> Exporter<i class="ri-arrow-down-s-line align-middle ms-1 d-inline-block"></i></a> <ul role="menu" class="dropdown-menu"><li><a href="javascript:void(0);" class="dropdown-item">Excel</a></li> <li><a href="javascript:void(0);" class="dropdown-item">PDF</a></li></ul></div>
                     </div>
                 </div>
                 <div class="card-body">
