@@ -26,7 +26,7 @@ new Vue({
     methods: {
         getSales() {
             this.isDataLoading = true;
-            get("/reports.sales")
+            get(`/reports.sales?date=${this.search}`)
                 .then((res) => {
                     this.isDataLoading = false;
                     this.reports = res.data.sales_report;
@@ -39,7 +39,7 @@ new Vue({
 
         getSalesReturns() {
             this.isDataLoading = true;
-            get("/sales.returns")
+            get(`/sales.returns?date=${this.search}`)
                 .then((res) => {
                     this.isDataLoading = false;
                     this.returns = res.data.returns;

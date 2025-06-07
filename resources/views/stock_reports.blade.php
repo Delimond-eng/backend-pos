@@ -29,8 +29,9 @@
                             <input v-model="search" class="form-control form-control-sm border-primary-subtle" type="text" placeholder="Recherche produit " aria-label=".form-control-sm example">
                         </div>
                         <div class="me-2 mb-sm-0">
-                            <select class="form-control form-control-sm border-primary-subtle">
+                            <select v-model="type" class="form-control form-control-sm border-primary-subtle">
                                 <option value="" selected hidden>Type</option>
+                                <option value="">Tout</option>
                                 <option value="purchase">Approvisionnement</option>
                                 <option value="sale">Vente</option>
                                 <option value="adjustment">Ajustement</option>
@@ -38,18 +39,15 @@
                             </select>
                         </div>
                         <div class="me-2 d-flex justify-content-center align-items-center">
-                            <input class="form-control form-control-sm border-primary-subtle" type="date" required />
+                            <input v-model="date.start" class="form-control form-control-sm border-primary-subtle" type="date" />
                             <span>--</span>
-                            <input class="form-control form-control-sm border-primary-subtle" type="date" />
-                            <button class="btn btn-primary btn-sm btn-icon ms-2">
+                            <input v-model="date.end" class="form-control form-control-sm border-primary-subtle" type="date" />
+                            <button @click="getReports" class="btn btn-primary btn-sm btn-icon ms-2">
                                 <i class="ri-search-2-line"></i>
                             </button>
-                        </div>
-                        <div class="dropdown"> <a href="javascript:void(0);" class="btn btn-info btn-sm btn-wave waves-effect waves-light" data-bs-toggle="dropdown" aria-expanded="false"> Exporter<i class="ri-arrow-down-s-line align-middle ms-1 d-inline-block"></i> </a>
-                            <ul class="dropdown-menu" role="menu">
-                                <li><a class="dropdown-item" href="javascript:void(0);">Excel</a></li>
-                                <li><a class="dropdown-item" href="javascript:void(0);">PDF</a></li>
-                            </ul>
+                            <button onclick="location.reload()" class="btn btn-primary-light btn-sm btn-icon ms-2">
+                                <i class="ri-refresh-line"></i>
+                            </button>
                         </div>
                     </div>
                 </div>

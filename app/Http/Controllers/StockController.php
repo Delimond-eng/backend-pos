@@ -10,6 +10,7 @@ use App\Models\StockMovement;
 use App\Models\Inventory;
 use App\Models\InventoryLine;
 use App\Models\PurchaseItem;
+use App\Models\SaleItem;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -375,15 +376,21 @@ class StockController extends Controller
     }
 
 
-    public function getReturnStories()
+    public function getReturnStories(Request $request)
     {
-        $retours = StockMovement::with('product')
-            ->where('type', 'return') // ou 'retour'
+        $date = $request->query("date") ?? null;
+        $req = StockMovement::with('product');
+
+        if($date){
+            $req->whereDate("created_at", $date);
+        }
+
+        $returns = $req->where('type', 'return') // ou 'retour'
             ->orderByDesc('created_at')
             ->get();
 
         return response()->json([
-            "returns"=>$retours
+            "returns"=>$returns 
         ]);
     }
 
@@ -615,9 +622,22 @@ class StockController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function reportStockMovements()
+    public function reportStockMovements(Request $request)
     {
-        $movements = StockMovement::with('product')->orderByDesc('created_at')->get();
+        $start = $request->query("start") ?? null;
+        $end = $request->query("end") ?? null;
+
+        $req = StockMovement::with('product');
+        $req->when($start && $end, function ($query) use ($start, $end) {
+            return $query->whereBetween('created_at', [$start, $end]);
+        })
+        ->when($start && !$end, function ($query) use ($start) {
+            return $query->whereDate('created_at', $start);
+        })
+        ->when(!$start && $end, function ($query) use ($end) {
+            return $query->whereDate('created_at', $end);
+        });
+        $movements = $req->orderByDesc('created_at')->get();
         return response()->json(['stock_movements' => $movements]);
     }
     /**
@@ -625,40 +645,79 @@ class StockController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function reportStockAdjustments()
+    public function reportStockAdjustments(Request $request)
     {
-        $movements = StockMovement::with('product')->where("type", "adjustment")->orderByDesc('created_at')->get();
+        $start = $request->query("start") ?? null;
+        $end = $request->query("end") ?? null;
+        $req = StockMovement::with('product');
+
+        $req->when($start && $end, function ($query) use ($start, $end) {
+            return $query->whereBetween('created_at', [$start, $end]);
+        })
+        ->when($start && !$end, function ($query) use ($start) {
+            return $query->whereDate('created_at', $start);
+        })
+        ->when(!$start && $end, function ($query) use ($end) {
+            return $query->whereDate('created_at', $end);
+        });
+        
+        $movements = $req->where("type", "adjustment")->orderByDesc('created_at')->get();
         return response()->json(['adjustments' => $movements]);
     }
 
+    public function reportStockGlobal()
+    {
+        $reports = Product::query()
+            ->leftJoin('stock_movements', 'products.id', '=', 'stock_movements.product_id')
+            ->select([
+                'products.id',
+                'products.name',
+                'products.stock',
 
-    public function reportStockGlobal(){
-        $reports = Product::select([
-            'products.id',
-            'products.name',
-            'products.stock',
-            // Totaux par type
-            DB::raw("SUM(CASE WHEN stock_movements.type = 'sale' THEN -stock_movements.quantity ELSE 0 END) as total_sale"),
-            DB::raw("SUM(CASE WHEN stock_movements.type = 'adjustment' THEN stock_movements.quantity ELSE 0 END) as total_adjustment"),
-            DB::raw("SUM(CASE WHEN stock_movements.type = 'return' THEN stock_movements.quantity ELSE 0 END) as total_return"),
-            DB::raw("SUM(CASE WHEN stock_movements.type = 'output' THEN -stock_movements.quantity ELSE 0 END) as total_output"),
-            DB::raw("SUM(CASE WHEN stock_movements.type = 'purchase' THEN stock_movements.quantity ELSE 0 END) as total_purchase"),
-            // Stock global (entrées - sorties)
-            DB::raw("SUM(
-                CASE
-                    WHEN stock_movements.type IN ('purchase', 'return', 'adjustment') THEN stock_movements.quantity
-                    WHEN stock_movements.type IN ('sale', 'output') THEN -stock_movements.quantity
-                    ELSE 0
-                END
-            ) as stock_actuel"),
-        ])
-        ->leftJoin('stock_movements', 'products.id', '=', 'stock_movements.product_id')
-        ->groupBy('products.id', 'products.name','products.stock')
-        ->get();
+                // Mouvements de stock
+                DB::raw("SUM(CASE WHEN stock_movements.type = 'sale' THEN -stock_movements.quantity ELSE 0 END) as total_sale"),
+                DB::raw("SUM(CASE WHEN stock_movements.type = 'adjustment' THEN stock_movements.quantity ELSE 0 END) as total_adjustment"),
+                DB::raw("SUM(CASE WHEN stock_movements.type = 'return' THEN stock_movements.quantity ELSE 0 END) as total_return"),
+                DB::raw("SUM(CASE WHEN stock_movements.type = 'output' THEN -stock_movements.quantity ELSE 0 END) as total_output"),
+                DB::raw("SUM(CASE WHEN stock_movements.type = 'purchase' THEN stock_movements.quantity ELSE 0 END) as total_purchase"),
+
+                // Stock réel calculé dynamiquement
+                DB::raw("SUM(
+                    CASE
+                        WHEN stock_movements.type IN ('purchase', 'return', 'adjustment') THEN stock_movements.quantity
+                        WHEN stock_movements.type IN ('sale', 'output') THEN -stock_movements.quantity
+                        ELSE 0
+                    END
+                ) as stock_actuel"),
+            ])
+            // Sous-requête pour total_quantity_vendue
+            ->addSelect([
+                'total_quantity_vendue' => SaleItem::selectRaw('COALESCE(SUM(quantity), 0)')
+                    ->whereColumn('product_id', 'products.id')
+            ])
+            // Sous-requête pour total_revenu
+            ->addSelect([
+                'total_revenu' => SaleItem::selectRaw('COALESCE(SUM(quantity * unit_price), 0)')
+                    ->whereColumn('product_id', 'products.id')
+            ])
+            // Sous-requête pour prix_moyen_achat
+            ->addSelect([
+                'prix_moyen_achat' => PurchaseItem::selectRaw('COALESCE(AVG(unit_price), 0)')
+                    ->whereColumn('product_id', 'products.id')
+            ])
+            ->groupBy('products.id', 'products.name', 'products.stock')
+            ->get()
+            ->map(function ($item) {
+                $revenu = $item->total_revenu ?? 0;
+                $cout = ($item->prix_moyen_achat ?? 0) * ($item->total_quantity_vendue ?? 0);
+                $item->benefice = round($revenu - $cout, 2);
+                return $item;
+            });
 
         return response()->json([
-            "status"=>"success",
-            "reports"=>$reports
+            "status" => "success",
+            "reports" => $reports
         ]);
     }
+
 }

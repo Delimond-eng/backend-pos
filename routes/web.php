@@ -25,7 +25,6 @@ use Illuminate\Support\Facades\Route;
 
 Auth::routes();
 Route::middleware(['auth'])->group(function () {
-
     // === Accueil ===
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::view('/sale.portal', "sales_home")->name('sale.portal');

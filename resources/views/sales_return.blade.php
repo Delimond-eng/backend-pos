@@ -25,12 +25,13 @@
                         Historique des produits retournés
                     </div>
                     <div class="d-sm-flex">
-                        <div class="me-3 mb-3 mb-sm-0">
-                            <input v-model="search" class="form-control form-control-sm border-primary-subtle" type="date" placeholder="Recherche produit " aria-label=".form-control-sm example">
+                        <div class="mb-3 me-1 mb-sm-0">
+                            <input v-model="search" @input="getSalesReturns" class="form-control form-control-sm border-primary-subtle" type="date" aria-label=".form-control-sm example">
                         </div>
-                        <div class="me-3 mb-3 mb-sm-0">
-                            <button class="btn btn-outline-primary btn-sm"> <i class="ri-file-pdf-fill me-1"></i> Exporter en PDF</button>
-                        </div>
+                        <button v-if="search" onclick="location.reload()" class="btn btn-primary-light btn-sm btn-icon">
+                            <i class="ri-refresh-line"></i>
+                        </button>
+                        
                     </div>
                 </div>
                 <div class="card-body">

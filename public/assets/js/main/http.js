@@ -57,6 +57,7 @@ export async function get(url) {
             "Content-Type": "application/json",
         },
     });
+
     const data = await response.json();
     return { data, status: response.status };
 }

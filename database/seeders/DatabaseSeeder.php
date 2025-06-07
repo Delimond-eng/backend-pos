@@ -46,10 +46,10 @@ class DatabaseSeeder extends Seeder
             ProductCategory::updateOrCreate( ["name"=>$cat],["name"=>$cat]);
         }
 
-        Product::updateOrCreate(["name"=> "Gateaux new lis"], [
+        /* Product::updateOrCreate(["name"=> "Gateaux new lis"], [
             "name"=>"Gateaux new lis",
             "category_id"=>2,
             "unit_price"=>1500.00,
-        ]);
+        ]); */
     }
 }

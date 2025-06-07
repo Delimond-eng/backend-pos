@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Product extends Model
 {
@@ -31,5 +32,30 @@ class Product extends Model
     public function getStockGlobalAttribute()
     {
         return $this->movements()->sum('quantity'); // Entrées (+) - Sorties (-)
+    }
+
+
+    public function saleItems()
+    {
+        return $this->hasMany(SaleItem::class, 'product_id', 'id');
+    }
+
+
+    
+    public function purchaseItems()
+    {
+        return $this->hasMany(PurchaseItem::class, "product_id", "id");
+    }
+
+    public function averagePurchasePrice()
+    {
+        return $this->purchaseItems()
+            ->avg(DB::raw('unit_price'));
+    }
+
+
+    public function totalPurchasedQuantity()
+    {
+        return $this->purchaseItems()->sum('quantity');
     }
 }

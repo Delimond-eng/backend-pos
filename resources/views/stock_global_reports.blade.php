@@ -28,12 +28,7 @@
                         <div class="me-2 mb-sm-0">
                             <input v-model="search" class="form-control form-control-sm border-primary-subtle" type="text" placeholder="Recherche produit " aria-label=".form-control-sm example">
                         </div>
-                        <div class="dropdown"> <a href="javascript:void(0);" class="btn btn-info btn-sm btn-wave waves-effect waves-light" data-bs-toggle="dropdown" aria-expanded="false"> Exporter<i class="ri-arrow-down-s-line align-middle ms-1 d-inline-block"></i> </a>
-                            <ul class="dropdown-menu" role="menu">
-                                <li><a class="dropdown-item" href="javascript:void(0);">Excel</a></li>
-                                <li><a class="dropdown-item" href="javascript:void(0);">PDF</a></li>
-                            </ul>
-                        </div>
+                        
                     </div>
                 </div>
                 <div class="card-body">
@@ -52,6 +47,7 @@
                                     <th scope="col" class="bg-primary-transparent text-primary">Ajustements</th>
                                     <th scope="col" class="bg-primary-subtle text-primary">Autres sorties</th>
                                     <th scope="col" class="bg-primary-transparent text-primary">Stock actuel</th>
+                                    <th scope="col" class="bg-primary-transparent text-primary">Profit</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -76,6 +72,9 @@
                                     </td>
                                     <td>
                                         <span class="fw-semibold">@{{ data.stock }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="fw-semibold text-success">@{{ data.benefice }} F</span>
                                     </td>
                                 </tr>
                             </tbody>

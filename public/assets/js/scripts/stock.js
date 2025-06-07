@@ -13,6 +13,11 @@ new Vue({
             isLoading: false,
             isDataLoading: false,
             search: "",
+            type: "",
+            date: {
+                start: "",
+                end: "",
+            },
             load_id: "",
             reports: [],
             adjustments: [],
@@ -30,7 +35,9 @@ new Vue({
     methods: {
         getReports() {
             this.isDataLoading = true;
-            get("/reports.stock-movements")
+            get(
+                `/reports.stock-movements?start=${this.date.start}&end=${this.date.end}`
+            )
                 .then((res) => {
                     this.isDataLoading = false;
                     this.reports = res.data.stock_movements;
@@ -42,7 +49,9 @@ new Vue({
         },
         getAdjustmentReports() {
             this.isDataLoading = true;
-            get("/reports.adjustments")
+            get(
+                `/reports.adjustments?start=${this.date.start}&end=${this.date.end}`
+            )
                 .then((res) => {
                     this.isDataLoading = false;
                     this.adjustments = res.data.adjustments;
@@ -56,7 +65,6 @@ new Vue({
             this.isDataLoading = true;
             get("/stock.global")
                 .then((res) => {
-                    console.log(JSON.stringify(res.data.reports));
                     this.isDataLoading = false;
                     this.globals = res.data.reports;
                 })
@@ -69,17 +77,23 @@ new Vue({
 
     computed: {
         allReports() {
-            // Filtrage en fonction de la recherche
-            const filteredStocks =
-                this.search && this.search.trim()
-                    ? this.reports.filter((el) =>
-                          el.product.name
-                              .toLowerCase()
-                              .includes(this.search.toLowerCase())
-                      )
-                    : this.reports;
-            // Appliquer les calculs sur les résultats filtrés
-            return filteredStocks;
+            const search = this.search?.trim().toLowerCase() || "";
+            const type = this.type?.trim().toLowerCase() || "";
+
+            // Si aucun filtre n'est renseigné, retourner tous les rapports
+            if (!search && !type) {
+                return this.reports;
+            }
+
+            // Sinon, appliquer les filtres
+            return this.reports.filter((el) => {
+                const nameMatch = el.product.name
+                    ?.toLowerCase()
+                    .includes(search);
+                const typeMatch = el.type?.toLowerCase().includes(type);
+
+                return (!search || nameMatch) && (!type || typeMatch);
+            });
         },
 
         allAdjustments() {
